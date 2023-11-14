@@ -12,10 +12,10 @@ Tampermonkey scripts to use for day to day interaction with browser
 
 ## Scripts
 
-| Folder   | Name                                | What                                                                                                                                              |
-|----------|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| linkedin | Easy Apply -- Do not follow.user.js | Automatically uncheck `Follow _name_ to stay up to date with their page.` right before clicking `Submit Application` button in Easy Apply pop-up  |
-| linkedin | Unfollow all companies.js           | Unfollows all companies from your [list](https://www.linkedin.com/mynetwork/network-manager/company/). Helps you maintain less noise in your feed |
+| Folder   | Name                                 | What                                                                                                                                              |
+|----------|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| linkedin | Easy Apply -- make it even easier.js | Makes "Easy Apply" actually easy:  <br/>- auto uncheck company to follow <br/>- closes pop-up after resume submit                                 |
+| linkedin | Unfollow all companies.js            | Unfollows all companies from your [list](https://www.linkedin.com/mynetwork/network-manager/company/). Helps you maintain less noise in your feed |
 
 ## Issues, requests, feedback ?
 

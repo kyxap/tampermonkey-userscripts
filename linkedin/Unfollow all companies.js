@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Unfollow all companies
 // @namespace    http://tampermonkey.net/
-// @version      0.0.11
+// @version      0.0.12
 // @description  Simple way to unfollow all those pages/companies to make your feed cleaner
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/mynetwork/network-manager/company/*
@@ -13,7 +13,7 @@
     'use strict';
     const followButtonXPath = '//*[@class="artdeco-button__text" and text()="Following"]';
     const unFollowButtonXPath = '//*[@class="artdeco-button__text" and text()="Unfollow"]';
-    const timeoutMs = 150; // Adjust the delay time as needed
+    const timeoutMs = 200; // Adjust the delay time as needed
 
     var node = document.createElement('div');
     node.innerHTML = '<button id="customButton" type="button">Unfollow ALL!</button>';
@@ -80,6 +80,8 @@
                 .catch(function (error) {
                     console.error('Error while waiting for Follow button:', error);
                 });
+            // Scroll down
+            window.scrollBy(0, window.innerHeight);
         } else {
             console.log('Unfollow process completed.');
         }
