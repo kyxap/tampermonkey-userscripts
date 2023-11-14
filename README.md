@@ -12,13 +12,14 @@ Tampermonkey scripts to use for day to day interaction with browser
 
 ## Scripts
 
-| Folder   | Name                                | What                                                                                                                                             |
-|----------|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| linkedin | Easy Apply -- Do not follow.user.js | Automatically uncheck `Follow _name_ to stay up to date with their page.` right before clicking `Submit Application` button in Easy Apply pop-up |
+| Folder   | Name                                | What                                                                                                                                              |
+|----------|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| linkedin | Easy Apply -- Do not follow.user.js | Automatically uncheck `Follow _name_ to stay up to date with their page.` right before clicking `Submit Application` button in Easy Apply pop-up  |
+| linkedin | Unfollow all companies.js           | Unfollows all companies from your [list](https://www.linkedin.com/mynetwork/network-manager/company/). Helps you maintain less noise in your feed |
 
 ## Issues, requests, feedback ?
 
-Please create an issue in the project if any. 
+Please create an issue in the project if any.
 
 ## License
 
