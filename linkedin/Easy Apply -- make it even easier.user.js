@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         Easy Apply -> make it even easier 
-// @namespace    http://tampermonkey.net/
-// @version      0.0.5
+// @name         Easy Apply -> make it even easier
+// @version      0.0.6
 // @description  Makes "Easy Apply" actually easy: 1) auto uncheck company to follow 2) closes pop after submit
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/jobs/search/*
+// @match        https://www.linkedin.com/jobs/collections/recommended/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=linkedin.com
 // @grant        none
 // ==/UserScript==
