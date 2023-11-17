@@ -4,7 +4,6 @@
 // @description  Makes "Easy Apply" actually easy: 1) auto uncheck company to follow 2) closes pop after submit
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/*
-// @grant        window.onurlchange
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=linkedin.com
 // @grant        none
 // ==/UserScript==
