@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         Easy Apply -> make it even easier
-// @version      0.0.8
+// @version      0.0.9
 // @description  Makes "Easy Apply" actually easy: 1) auto uncheck company to follow 2) closes pop after submit
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=linkedin.com
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/linkedin/Easy%20Apply%20--%20make%20it%20even%20easier.user.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/linkedin/Easy%20Apply%20--%20make%20it%20even%20easier.user.js
+// @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @grant        none
 // ==/UserScript==
 

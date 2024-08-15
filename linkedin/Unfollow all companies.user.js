@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name         Unfollow all companies
 // @namespace    http://tampermonkey.net/
-// @version      0.0.12
+// @version      0.0.13
 // @description  Simple way to unfollow all those pages/companies to make your feed cleaner
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/mynetwork/network-manager/company/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=linkedin.com
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/linkedin/Unfollow%20all%20companies.user.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/linkedin/Unfollow%20all%20companies.user.js
+// @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @grant        GM_addStyle
 // ==/UserScript==
 
