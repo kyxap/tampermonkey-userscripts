@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points
 // @namespace    https://rewards.bing.com
-// @version      0.0.4
+// @version      0.0.5
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -18,7 +18,7 @@ const gmCardsKey = 'ms_clicked_cards_title';
 const reloadInterval = 3600 * 12 * 1000; // 12 hours in milliseconds
 const timeout = 3000;
 
-(function() {
+(function () {
     'use strict';
 
     // Initial cleanup and script execution
@@ -26,7 +26,7 @@ const timeout = 3000;
     findAndClick();
 
     // Set interval to reload the page every 12 hours and start over
-    setInterval(function() {
+    setInterval(function () {
         location.reload();
     }, reloadInterval);
 
@@ -43,7 +43,7 @@ function findAndClick() {
     const linkSelector = '.ng-scope[ng-if="!$ctrl.locked && !$ctrl.isExclusiveLockedItem"] > .mee-icon-AddMedium[aria-label="plus"]'; // Change this to your link's selector
 
     // Wait for the page to load and then execute the script
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
         const cardElements = document.querySelectorAll(linkSelector);
 
         if (cardElements.length > 0) {
@@ -52,7 +52,7 @@ function findAndClick() {
             const storedListJSON = GM_getValue(gmCardsKey, '[]');
             const msCards = JSON.parse(storedListJSON);
 
-            cardElements.forEach(function(card) {
+            cardElements.forEach(function (card) {
                 const data = card.closest('.ds-card-sec');
                 const cardText = data.getAttribute('aria-label');
 
@@ -67,7 +67,7 @@ function findAndClick() {
                     card.click();
 
                     // Wait for n seconds
-                    setTimeout(function() {
+                    setTimeout(function () {
                         // Close the newly opened tab
                         // Note: This might not work due to cross-origin restrictions
                         // The new tab should be opened by the same script
