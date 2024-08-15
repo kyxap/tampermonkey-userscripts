@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points
 // @namespace    https://rewards.bing.com
-// @version      0.0.2
+// @version      0.0.3
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
