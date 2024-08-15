@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points
 // @namespace    https://rewards.bing.com
-// @version      0.0.3
+// @version      0.0.4
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/trustedhousesitters/new-sits-updates.user.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/trustedhousesitters/new-sits-updates.user.js
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @grant        GM_setValue
 // @grant        GM_getValue

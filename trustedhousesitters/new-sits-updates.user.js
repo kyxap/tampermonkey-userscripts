@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         new-sits-updates
-// @version      0.0.6
+// @version      0.0.7
 // @description  Telegram notification if new sits are available
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.trustedhousesitters.com/house-and-pet-sitting-assignments/?q=*
 // @icon         https://cdn.trustedhousesitters.com/static/favicon/mstile-150x150.png
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points.js
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/trustedhousesitters/new-sits-updates.user.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/trustedhousesitters/new-sits-updates.user.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @grant        GM_getValue
 // @grant        GM_setValue
