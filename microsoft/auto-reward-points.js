@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points 1 of 3
 // @namespace    https://rewards.bing.com
-// @version      0.0.6
+// @version      0.0.7
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -113,7 +113,7 @@ function askAI(prompt, callback) {
     // Call your Spring Boot API
     GM_xmlhttpRequest({
         method: "GET",
-        url: `http://localhost:54333/generate?prompt=${encodeURIComponent(task)}`,
+        url: `http://localhost:5433/generate?prompt=${encodeURIComponent(task)}`,
         onload: function (response) {
             if (response.status === 200) {
                 const result = response.responseText;
