@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Auto Microsoft Reword Points 2 of 3
+// @name         Auto Microsoft Reword Points 2 of 3 | Performs custom searches
 // @namespace    https://www.bing.com/
-// @version      0.0.1
+// @version      0.0.2
 // @description  Perform search actions in the tab
 // @match        https://www.bing.com/*?*PUBL=Rewards*data=*
 // @grant        none

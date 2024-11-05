@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Auto Microsoft Reword Points 1 of 3
+// @name         Auto Microsoft Reword Points 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.0.7
+// @version      0.0.8
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -9,101 +9,80 @@
 // @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points.js
 // @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @grant        GM_deleteValue
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
-const gmCardsKey = 'ms_clicked_cards_title';
 const reloadInterval = 3600 * 5 * 1000; // 5 hours in milliseconds
-const timeout = 3000;
 
 (function () {
     'use strict';
 
-
-    // Initial cleanup and script execution
-    cleanup();
     findAndClick();
 
-    // Set interval to reload the page every 12 hours and start over
+    // Set interval to reload the page every n hours and start over
     setInterval(function () {
         location.reload();
     }, reloadInterval);
 
 })();
 
-function cleanup() {
-    // Remove saved list
-    console.log('Removing saved list of clicked cards');
-    GM_deleteValue(gmCardsKey);
-}
-
 function findAndClick() {
     // The selector for the link you want to click
-    const linkSelector = '.ng-scope[ng-if="!$ctrl.locked && !$ctrl.isExclusiveLockedItem"] > .mee-icon-AddMedium[aria-label="plus"]'; // Change this to your link's selector
+    const cardsBaseCSS = '.ng-scope[ng-if="!$ctrl.locked && !$ctrl.isExclusiveLockedItem"] > .mee-icon-AddMedium[aria-label="plus"]'
+    // first 3 card on top, only click needed
+    const cardsDailySetCSS = '[points="$ctrl.item.points"] > * > ' + cardsBaseCSS
+    const cardsMoreActivitiesCSS = '[points="item.points"] > * > ' + cardsBaseCSS;
 
     // Wait for the page to load and then execute the script
     window.addEventListener('load', function () {
-        const cardElements = document.querySelectorAll(linkSelector);
+            const cardMoreActivitiesElements = document.querySelectorAll(cardsMoreActivitiesCSS);
+            const cardDailySetElements = document.querySelectorAll(cardsDailySetCSS);
 
-        if (cardElements.length > 0) {
-            console.log('Elements found, checking before click');
+            // cards needs only click without custom search query
+            if (cardDailySetElements.length > 0) {
+                console.log('===> Daily sets elements found, checking before click');
 
-            const storedListJSON = GM_getValue(gmCardsKey, '[]');
-            const msCards = JSON.parse(storedListJSON);
+                cardDailySetElements.forEach(function (card) {
+                        const data = card.closest('.ds-card-sec');
+                        const cardText = data.getAttribute('aria-label');
 
-            cardElements.forEach(function (card) {
-                const data = card.closest('.ds-card-sec');
-                const cardText = data.getAttribute('aria-label');
+                        console.log(`Working on card with a text: "${cardText}"`);
+                        card.click();
+                        // another script will close opened tab
+                    }
+                )
+            } else {
+                console.info('No cards (cardDailySetElements) found on the page');
+            }
 
-                if (msCards.includes(cardText)) {
-                    console.log("Skipping, already clicked: " + cardText);
-                } else {
-                    // Update the list (e.g., add a new item)
-                    msCards.push(cardText);
+            // cards that for most cases requires custom search request on bing
+            if (cardMoreActivitiesElements.length > 0) {
+                console.log('===> More Activities Elements found, checking before click');
 
-                    console.log(`Going to click: "${cardText}"`);
-                    askAI(cardText, function (result) {
-                        if (result) {
-                            // Do something with the result
-                            // Simulate a click on the link
-                            const cardUrlWithData = card.closest('a').href + `&data=${result}`
+                cardMoreActivitiesElements.forEach(function (card) {
+                        const data = card.closest('.ds-card-sec');
+                        const cardText = data.getAttribute('aria-label');
 
-                            console.log("Url with query: " + cardUrlWithData)
-                            window.open(cardUrlWithData, '_blank');
+                        console.log(`Working on card with a text: "${cardText}"`);
+                        askAI(cardText, function (result) {
+                            if (result) {
+                                const cardUrlWithData = card.closest('a').href + `&data=${result}`
 
-                            // Wait for n seconds
-                            setTimeout(function () {
-                                // Close the newly opened tab
-                                // Note: This might not work due to cross-origin restrictions
-                                // The new tab should be opened by the same script
-                                // It is better to use this script in the new tab directly
-                                // if (window.location !== window.parent.location) {
-                                //     window.close();
-                                // } else {
-                                //     console.log('The script should be used in the new tab.');
-                                // }
+                                console.log("Url with query: " + cardUrlWithData)
+                                window.open(cardUrlWithData, '_blank');
 
-                                // Save the updated list
-                                GM_setValue(gmCardsKey, JSON.stringify(msCards));
-                            }, timeout);
-                        } else {
-                            console.log("No result received so going to open but next script will close it right a way");
-                            const cardUrlWithData = card.closest('a').href + `&data=close-me`
+                            } else {
+                                console.error("No result received so going to open but next script will close it right a way");
+                            }
+                        });
 
-                            console.log("Url with query just to close: " + cardUrlWithData)
-                            window.open(cardUrlWithData, '_blank');
-                        }
-                    });
-
-                }
-            });
-        } else {
-            console.log('No elements found.');
+                    }
+                )
+            } else {
+                console.info('No cards (cardsMoreActivitiesCSS) found on the page');
+            }
         }
-    });
+    )
 }
 
 // requires AI chat model to work on your local, let me know if you interested and I can share this project
