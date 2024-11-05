@@ -1,13 +1,13 @@
 // ==UserScript==
-// @name         Auto Microsoft Reword Points 2 of 3 | Performs custom searches
+// @name         Auto Microsoft Reword Points Cards 2 of 3 | Performs custom searches
 // @namespace    https://www.bing.com/
-// @version      0.0.2
+// @version      0.0.4
 // @description  Perform search actions in the tab
 // @match        https://www.bing.com/*?*PUBL=Rewards*data=*
 // @grant        none
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points-card-tab.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/auto-reward-points-card-tab.js
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-card-tab.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-card-tab.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @author       kyxap | https://github.com/kyxap
 // ==/UserScript==
