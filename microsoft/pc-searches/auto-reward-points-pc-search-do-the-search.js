@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.1
+// @version      0.0.2
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
@@ -56,8 +56,7 @@ const timeout = 5 * 1000; // 5 sec
     // Optional: Set a timeout to close the tab after a delay
     setTimeout(function () {
         // Close the tab after the timeout
-        console.log("CLOSED1")
-        //window.close();
+        window.close();
     }, timeout);
 })();
 
