@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 1 of 3 | PC Searches Points Breakdown
 // @namespace    https://rewards.bing.com/
-// @version      0.0.3
+// @version      0.0.4
 // @description  PC Searches Points Breakdown
 // @match        https://rewards.bing.com/pointsbreakdown
 // @grant        none
@@ -42,7 +42,7 @@ async function checkSearchCounts() {
     let doneSearchesCount = extractDoneSearches(searchCounterElement.textContent);
     console.log(`Searches performed so far: ${doneSearchesCount} out of ${maxSearchesCount}`);
 
-    for (let i = doneSearchesCount; i <= maxSearchesCount && doneSearchesCount !== maxSearchesCount; i++) {
+    for (let i = doneSearchesCount; i <= maxSearchesCount || doneSearchesCount !== maxSearchesCount; i++) {
         // Click the search link
         document.querySelector(linkToSearchCSS).click();
         console.log(`Clicked search link.`);
