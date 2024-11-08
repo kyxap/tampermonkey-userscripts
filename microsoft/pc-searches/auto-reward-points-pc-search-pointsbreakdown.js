@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 1 of 3 | PC Searches Points Breakdown
 // @namespace    https://rewards.bing.com/
-// @version      0.0.4
+// @version      0.0.5
 // @description  PC Searches Points Breakdown
 // @match        https://rewards.bing.com/pointsbreakdown
 // @grant        none
@@ -21,12 +21,15 @@ const timeoutToCheckIfCounterUpdated = 10000; // Set your desired timeout in mil
 (function () {
     'use strict';
 
-    checkSearchCounts();
+    // Wait for the page to fully load
+    window.onload = function () {
+        checkSearchCounts();
 
-    // Set interval to reload the page every n hours and start over
-    setInterval(function () {
-        location.reload();
-    }, reloadInterval);
+        // Set interval to reload the page every n hours
+        setInterval(function () {
+            location.reload();
+        }, reloadInterval);
+    };
 })();
 
 async function checkSearchCounts() {
