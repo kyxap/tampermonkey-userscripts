@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.0.10
+// @version      0.1.0
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -38,7 +38,7 @@ function findAndClick() {
             const cardMoreActivitiesElements = document.querySelectorAll(cardsMoreActivitiesCSS);
             const cardDailySetElements = document.querySelectorAll(cardsDailySetCSS);
 
-            // cards needs only click without custom search query
+            // top 3 cards that need only click without custom search query
             if (cardDailySetElements.length > 0) {
                 console.log('===> Daily sets elements found, checking before click');
 
@@ -60,6 +60,11 @@ function findAndClick() {
                 console.log('===> More Activities Elements found, checking before click');
 
                 cardMoreActivitiesElements.forEach(function (card) {
+                        // click on card, since there a chance that this one need click without any custom search
+                        // TODO: identify this case and avoid this if is not needed
+                        card.click();
+
+                        // extract text from cards description and ask AI
                         const data = card.closest('.ds-card-sec');
                         const cardText = data.getAttribute('aria-label');
 
@@ -75,7 +80,6 @@ function findAndClick() {
                                 console.error("No result received so going to open but next script will close it right a way");
                             }
                         });
-
                     }
                 )
             } else {
