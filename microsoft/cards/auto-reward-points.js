@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.1.0
+// @version      0.1.1
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -52,7 +52,7 @@ function findAndClick() {
                     }
                 )
             } else {
-                console.info('No cards (cardDailySetElements) found on the page');
+                console.info('Got all card points from cardDailySetElements');
             }
 
             // cards that for most cases requires custom search request on bing
@@ -83,7 +83,7 @@ function findAndClick() {
                     }
                 )
             } else {
-                console.info('No cards (cardsMoreActivitiesCSS) found on the page');
+                console.info('Got all card points from cardMoreActivitiesElements');
             }
         }
     )
