@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 3 of 3 | Closes search results
 // @namespace    https://www.bing.com/
-// @version      0.0.6
+// @version      0.0.7
 // @description  Closes search results
 // @match        https://www.bing.com/search?form=&q=*
 // @match        https://www.bing.com/search?q=*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const timeout = 5000; // Set your desired timeout in milliseconds
+    const timeout = 15 * 1000; // Set your desired timeout in milliseconds
     setTimeout(function () {
         // Close the tab after the timeout
         window.close();
