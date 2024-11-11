@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 3 of 3 | Closes search results
 // @namespace    https://www.bing.com/
-// @version      0.0.5
+// @version      0.0.6
 // @description  Closes search results
 // @match        https://www.bing.com/search?form=&q=*
 // @match        https://www.bing.com/search?q=*
 // @match        https://www.bing.com/search?form=*
+// @match        https://www.bing.com/?form=*
 // @grant        none
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
 // @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-search-results.js
