@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 1 of 3 | PC Searches Points Breakdown
 // @namespace    https://rewards.bing.com/
-// @version      0.0.7
+// @version      0.0.8
 // @description  PC Searches Points Breakdown
 // @match        https://rewards.bing.com/pointsbreakdown
 // @grant        none
@@ -57,10 +57,7 @@ async function checkSearchCounts() {
         // Wait for the specified timeout
         await new Promise(resolve => setTimeout(resolve, timeoutToCheckIfCounterUpdated));
 
-        // Update the search count
-        searchCounterElement = document.querySelector(searchesCounterCSS);
-        doneSearchesCount = extractSearchesCount(searchCounterElement.textContent, 0);
-        console.log(`Updated done searches count: ${doneSearchesCount}`);
+        console.log(`Updated done searches count: ${extractSearchesCount(searchCounterElement.textContent, 0)}`);
     }
 
     console.log('Max searches count reached. Stopping the process.');
