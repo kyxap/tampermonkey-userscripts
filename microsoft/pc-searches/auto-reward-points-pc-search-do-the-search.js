@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.3
+// @version      0.0.4
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
@@ -58,8 +58,8 @@ const timeout = 5 * 1000; // 5 sec
 })();
 
 // List of items and colors
-const items = ["car", "shirt", "laptop", "bike", "hat"];
-const colors = ["red", "blue", "green", "yellow", "purple"];
+const items = ["car", "shirt", "laptop", "bike", "hat", "paint", "pen", "shoes"];
+const colors = ["red", "blue", "green", "yellow", "purple", "dark", "grey", "black"];
 
 // Function to generate random search text
 function generateRandomSearchText() {
@@ -67,13 +67,7 @@ function generateRandomSearchText() {
     const randomItem = items[Math.floor(Math.random() * items.length)];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    // Replace <one> and <two> in a template
-    const template = "Find a <one> in <two> color";
-    const searchText = template
-        .replace("<one>", randomItem)
-        .replace("<two>", randomColor);
-
-    return searchText;
+    return randomColor + " " + randomItem;
 }
 
 // requires AI chat model to work on your local, let me know if you interested and I can share this project
