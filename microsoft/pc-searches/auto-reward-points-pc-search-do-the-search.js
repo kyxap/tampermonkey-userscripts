@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.4
+// @version      0.0.5
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
@@ -91,7 +91,10 @@ function askAI(prompt, callback) {
         },
         onerror: function (error) {
             console.error("Request failed:", error);
-            callback(null); // Call the callback with null
+            console.error("No result received from AI, going to use random static data");
+            const rndStatic = generateRandomSearchText();
+            console.log("Query generated from static data: " + rndStatic)
+            callback(rndStatic);
         }
     });
 }
