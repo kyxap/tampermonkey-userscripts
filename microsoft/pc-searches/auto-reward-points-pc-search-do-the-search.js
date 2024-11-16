@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.2
+// @version      0.0.3
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
@@ -37,18 +37,15 @@ const timeout = 5 * 1000; // 5 sec
     const inputElement = document.getElementById('sb_form_q');
 
     if (inputElement) {
-
         askAI(aiRequest, function (result) {
             if (result) {
                 console.log("Query received from ai: " + result)
                 // Simulate typing in the input element
                 simulateTextareaInput(inputElement, result);
-
             } else {
                 console.error("No result received from AI");
             }
         });
-
     } else {
         console.log("Input element not found");
     }
@@ -59,6 +56,25 @@ const timeout = 5 * 1000; // 5 sec
         window.close();
     }, timeout);
 })();
+
+// List of items and colors
+const items = ["car", "shirt", "laptop", "bike", "hat"];
+const colors = ["red", "blue", "green", "yellow", "purple"];
+
+// Function to generate random search text
+function generateRandomSearchText() {
+    // Pick random item and color
+    const randomItem = items[Math.floor(Math.random() * items.length)];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    // Replace <one> and <two> in a template
+    const template = "Find a <one> in <two> color";
+    const searchText = template
+        .replace("<one>", randomItem)
+        .replace("<two>", randomColor);
+
+    return searchText;
+}
 
 // requires AI chat model to work on your local, let me know if you interested and I can share this project
 function askAI(prompt, callback) {
@@ -73,7 +89,10 @@ function askAI(prompt, callback) {
                 callback(result); // Call the callback with the result
             } else {
                 console.error("Error:", response.statusText);
-                callback(null); // Call the callback with null or handle error as needed
+                console.error("No result received from AI, going to use random static data");
+                const rndStatic = generateRandomSearchText();
+                console.log("Query generated from static data: " + rndStatic)
+                callback(rndStatic);
             }
         },
         onerror: function (error) {
