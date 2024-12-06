@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.5
+// @version      0.0.6
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
@@ -75,7 +75,7 @@ function askAI(prompt, callback) {
     // Call your Spring Boot API
     GM_xmlhttpRequest({
         method: "GET",
-        url: `http://localhost:5433/generate?prompt=${encodeURIComponent(prompt)}`,
+        url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(prompt)}`,
         onload: function (response) {
             if (response.status === 200) {
                 const result = response.responseText;

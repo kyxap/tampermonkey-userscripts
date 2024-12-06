@@ -19,10 +19,10 @@ Tampermonkey scripts to use for day to day interaction with your browser
 
 ## Scripts
 
-| Folder               | Name                                      | What                                                                                                                           |
+| Install link         | Name                                      | What                                                                                                                           |
 |----------------------|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| [linkedin](linkedin) | Easy Apply -- make it even easier.user.js | Makes "Easy Apply" actually easy:  <br/>- auto uncheck company to follow <br/>- closes pop-up after resume submit              |
-| [linkedin](linkedin) | Unfollow all companies.user.js            | Unfollows all companies from your [list](https://www.linkedin.com/mynetwork/network-manager/company/). Less noise in your feed |
+| [linkedin](https://github.com/kyxap/tampermonkey-userscripts/raw/refs/heads/main/linkedin/Easy%20Apply%20--%20make%20it%20even%20easier.user.js) | Easy Apply -- make it even easier.user.js | Makes "Easy Apply" actually easy:  <br/>- auto uncheck company to follow <br/>- closes pop-up after resume submit              |
+| [linkedin](https://github.com/kyxap/tampermonkey-userscripts/raw/refs/heads/main/linkedin/Easy%20Apply%20--%20make%20it%20even%20easier.user.js) | Unfollow all companies.user.js            | Unfollows all companies from your [list](https://www.linkedin.com/mynetwork/network-manager/company/). Less noise in your feed |
 
 ## Issues, requests, feedback ?
 
