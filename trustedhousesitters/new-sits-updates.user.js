@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         new-sits-updates
-// @version      0.0.7
+// @version      0.0.9
 // @description  Telegram notification if new sits are available
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.trustedhousesitters.com/house-and-pet-sitting-assignments/?q=*
@@ -26,7 +26,6 @@
         botToken = prompt('Please enter your Telegram bot token:');
         if (botToken) {
             GM_setValue(botTokenKey, botToken);
-
         } else {
             alert('Token is required!');
             return;
@@ -47,13 +46,14 @@
     const newListingCss = `[data-testid="ListingCard__container"]:has([data-testid="ListingCard__badge__new"])`
     const listingLocationCss = `[data-testid="ListingCard__location"]`;
 
-    start()
+    addResetButton();
+    start();
 
     function start() {
         cleanupOldIds(); // check if there old listing (> 1d)
-        getNewListings()
-        setTimeout(function () { location.reload(); }, 3600 * 1000); // 60m (3600 sec) // 20 mins was too much they added some "human" verification
-    };
+        getNewListings();
+        setTimeout(function () { location.reload(); }, 3600 * 1000); // 60m (3600 sec)  // 20 mins was too much they added some "human" verification
+    }
 
     function getNewListings() {
         let newListingsElements = document.querySelectorAll(newListingCss);
@@ -63,7 +63,7 @@
             console.log(`Found ${newListingsElements.length} listing with new tag`);
 
             for (let newListingElement of newListingsElements) {
-                const id = newListingElement.querySelector(`label > input`).getAttribute(`id`)
+                const id = newListingElement.querySelector(`label > input`).getAttribute(`id`);
                 if (isIdExists(id)) {
                     continue;
                 } else {
@@ -74,7 +74,7 @@
                 const listingUrl = baseUrl + newListingElement.getAttribute('href');
                 const location = newListingElement.querySelector(listingLocationCss).innerText;
                 const imgUrl = newListingElement.querySelector(`img[src]`).getAttribute(`src`);
-                const name = newListingElement.querySelector(`[data-testid="ListingCard__title"]`).innerText
+                const name = newListingElement.querySelector(`[data-testid="ListingCard__title"]`).innerText;
                 const dates = newListingElement.querySelector('div:nth-of-type(3)').innerText; // TODO no id so may not work
 
                 const message = `
@@ -83,8 +83,7 @@
 <i>${dates}</i>
             `;
                 sendMessage(message, imgUrl);
-              }
-
+            }
         } else {
             console.log("No new listings at the moment");
         }
@@ -92,10 +91,10 @@
 
     // Function to add a new ID with current timestamp
     function addId(id) {
-        console.log(`Saving id: ${id}`)
+        console.log(`Saving id: ${id}`);
         const ids = getAllIds();
         ids[id] = Date.now(); // Store current timestamp for the ID
-        console.log(`ids after id inster: ${ids}`)
+        console.log(`ids after id insert: ${ids}`)
         GM_setValue(idsKey, ids); // Save updated IDs
         console.log(`Saved: ids[${id}]:${ids[id]}`)
     }
@@ -147,7 +146,6 @@
     // Function to send the message
     function sendMessage(message, imgUrl) {
         const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
-
         const data = {
             chat_id: chatId,
             text: message,
@@ -176,4 +174,31 @@
         });
     }
 
+    function addResetButton() {
+
+        const button = document.createElement('button');
+        button.textContent = 'Reset History';
+        button.style.position = 'fixed';
+        button.style.bottom = '100px';
+        button.style.right = '10px';
+        button.style.zIndex = 1000;
+        button.style.padding = '10px';
+        button.style.backgroundColor = '#ff6347';
+        button.style.color = 'white';
+        button.style.border = 'none';
+        button.style.borderRadius = '5px';
+        button.style.cursor = 'pointer';
+
+        button.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all history?')) {
+            // Maybe TODO another button to reset telegram settings
+//                GM_deleteValue(botTokenKey);
+//                GM_deleteValue(chatIdKey);
+                GM_deleteValue(idsKey);
+                alert('History reset! Please refresh the page.');
+            }
+        });
+
+        document.body.appendChild(button);
+    }
 })();
