@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Easy Apply -> make it even easier
-// @version      0.1.0
+// @version      0.1.1
 // @description  Makes "Easy Apply" actually easy: 1) auto uncheck company to follow 2) closes pop after submit
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/*
@@ -19,8 +19,7 @@
     const xButtonOnPopUpSelector = 'div[data-test-modal][role="dialog"] > .artdeco-button';
     const allowedUrls = [
         "https://www.linkedin.com/jobs/search/",
-        "https://www.linkedin.com/jobs/collections/recommended/",
-        "https://www.linkedin.com/jobs/collections/screening-qualified"
+        "https://www.linkedin.com/jobs/collections/"
     ];
 
     // Create a debounced version of the start function
