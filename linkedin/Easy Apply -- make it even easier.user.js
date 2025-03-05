@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Easy Apply -> make it even easier
-// @version      0.1.1
+// @version      0.1.2
 // @description  Makes "Easy Apply" actually easy: 1) auto uncheck company to follow 2) closes pop after submit
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/*
@@ -15,7 +15,7 @@
     'use strict';
 
     const followCompanySelector = 'input#follow-company-checkbox:checked';
-    const doneButtonOnPopUpSelector = 'div[data-test-modal][role="dialog"] > .artdeco-modal__actionbar .artdeco-button'
+    const doneButtonOnPopUpSelector = 'div[data-test-modal][role="dialog"] > .artdeco-modal__actionbar .artdeco-button .artdeco-button__text'
     const xButtonOnPopUpSelector = 'div[data-test-modal][role="dialog"] > .artdeco-button';
     const allowedUrls = [
         "https://www.linkedin.com/jobs/search/",
