@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wellfound-one-click-apply
 // @namespace    https://wellfound.com/
-// @version      0.0.3
+// @version      0.0.4
 // @description  Only click apply for Wellfound
 // @match        https://wellfound.com/jobs
 // @author       kyxap | https://github.com/kyxap
@@ -79,7 +79,8 @@
                         'x-angellist-dd-client-referrer-resource': `/jobs/:jobId-:jobSlug([a-zA-Z0-9-_]+)`,
                         'x-apollo-operation-name': 'CreateJobApplication',
                         'x-apollo-signature': apolloSignature,
-                        'x-requested-with': 'XMLHttpRequest',
+                        'x-original-referer': 'https://wellfound.com/jobs',
+                        'x-requested-with': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({
                         operationName: "CreateJobApplication",
@@ -89,7 +90,7 @@
                                 jobListingId: jobId,
                                 product: "company profile",
                                 questionResponseSets: null,
-                                customQuestionAnswers: null,
+                                customQuestionAnswers: [],
                                 startupId: startupId,
                                 userNote: ""
                             }
