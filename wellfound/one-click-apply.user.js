@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         wellfound-one-click-apply
 // @namespace    https://wellfound.com/
-// @version      0.0.4
+// @version      0.0.5
 // @description  Only click apply for Wellfound
 // @match        https://wellfound.com/jobs
 // @author       kyxap | https://github.com/kyxap
@@ -162,9 +162,9 @@
         document.querySelectorAll('[data-test="StartupResult"]').forEach(injectButtons);
     }
 
-    function addResetButton() {
+    function addResetButtons() {
         const button = document.createElement('button');
-        button.textContent = 'Reset History';
+        button.textContent = 'Reset apolloSignature';
         Object.assign(button.style, {
             position: 'fixed',
             bottom: '100px',
@@ -179,14 +179,38 @@
         });
 
         button.addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset operationId and apolloSignature?')) {
-                GM_deleteValue(operationIdKey);
+            if (confirm('Are you sure you want to reset apolloSignature?')) {
+                // GM_deleteValue(operationIdKey);
                 GM_deleteValue(apolloSignatureKey);
                 alert('Values removed! Refresh the page to re-enter them.');
             }
         });
 
         document.body.appendChild(button);
+
+        const button2 = document.createElement('button');
+        button2.textContent = 'Reset operationId';
+        Object.assign(button2.style, {
+            position: 'fixed',
+            bottom: '100px',
+            right: '10px',
+            zIndex: 1000,
+            padding: '10px',
+            backgroundColor: '#ff6347',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+        });
+
+        button2.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset operationId')) {
+                GM_deleteValue(operationIdKey);
+                alert('Values removed! Refresh the page to re-enter them.');
+            }
+        });
+
+        document.body.appendChild(button2);
     }
 
     const observer = new MutationObserver(mutations => {
@@ -204,6 +228,6 @@
 
     observer.observe(document.querySelector('#main') || document.body, { childList: true, subtree: true });
 
-    addResetButton();
+    addResetButtons();
     scanAndInject();
 })();
