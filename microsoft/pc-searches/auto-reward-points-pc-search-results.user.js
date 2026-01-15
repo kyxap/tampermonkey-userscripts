@@ -6,8 +6,8 @@
 // @match        https://www.bing.com/news/search?q=*
 // @grant        GM_xmlhttpRequest
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-results.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-results.js
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-results.user.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-results.user.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @author       kyxap | https://github.com/kyxap
 // ==/UserScript==

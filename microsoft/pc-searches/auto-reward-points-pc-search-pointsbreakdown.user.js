@@ -6,8 +6,8 @@
 // @match        https://rewards.bing.com/pointsbreakdown
 // @grant        none
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-pointsbreakdown.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-pointsbreakdown.js
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-pointsbreakdown.user.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-pointsbreakdown.user.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @author       kyxap | https://github.com/kyxap
 // ==/UserScript==

@@ -12,8 +12,8 @@
 // @match        https://rewards.bing.com/sweepstakes/million/more-entries*
 // @grant        none
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-search-results.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-search-results.js
+// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-search-results.user.js
+// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-search-results.user.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @author       kyxap | https://github.com/kyxap
 // ==/UserScript==
