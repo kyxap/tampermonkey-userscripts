@@ -6,8 +6,8 @@
 // @match        https://www.bing.com/*?*PUBL=Rewards*data=*
 // @grant        none
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-card-tab.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points-card-tab.js
+// @updateURL    https://raw.githubusercontent.com/kyxap/tampermonkey-userscripts/refs/heads/main/microsoft/cards/auto-reward-points-card-tab.js
+// @downloadURL  https://raw.githubusercontent.com/kyxap/tampermonkey-userscripts/refs/heads/main/microsoft/cards/auto-reward-points-card-tab.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @author       kyxap | https://github.com/kyxap
 // ==/UserScript==
