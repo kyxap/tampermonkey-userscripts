@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 3 of 3 | Closes search results
 // @namespace    https://www.bing.com/
-// @version      0.0.9
+// @version      0.0.11
 // @description  Closes search results
 // @match        https://www.bing.com/search?form=&q=*
 // @match        https://www.bing.com/search?q=*
 // @match        https://www.bing.com/search?form=*
 // @match        https://www.bing.com/?form=*
 // @match        https://www.bing.com/spotlight/imagepuzzle*
-// temp while million entries
 // @match        https://rewards.bing.com/sweepstakes/million/more-entries*
 // @grant        none
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com

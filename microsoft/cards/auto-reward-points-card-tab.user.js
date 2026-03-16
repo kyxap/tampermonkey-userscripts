@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 2 of 3 | Performs custom searches
 // @namespace    https://www.bing.com/
-// @version      0.0.4
+// @version      0.0.6
 // @description  Perform search actions in the tab
 // @match        https://www.bing.com/*?*PUBL=Rewards*data=*
 // @grant        none

@@ -14,6 +14,8 @@
 // ==/UserScript==
 
 const reloadInterval = 3600 * 5 * 1000; // 5 hours in milliseconds
+// control whether searches open in a new tab (keeps main rewards page visible)
+const openSearchInNewTab = true;
 
 (function () {
     'use strict';
@@ -79,14 +81,19 @@ function findAndClick() {
                                 const cardUrlWithData = baseHref + `&data=${encodedQuery}`;
 
                                 console.log("Final query for card:", result);
-                                console.log("Opening new tab with encoded query: " + cardUrlWithData);
-                                if (typeof GM_openInTab === 'function') {
-                                    GM_openInTab(cardUrlWithData, { active: false, insert: true });
-                                } else {
-                                    const opened = window.open(cardUrlWithData, '_blank');
-                                    if (!opened) {
-                                        console.warn('window.open was blocked by the browser or failed to open.');
+                                if (openSearchInNewTab) {
+                                    console.log("Opening new tab with encoded query: " + cardUrlWithData);
+                                    if (typeof GM_openInTab === 'function') {
+                                        GM_openInTab(cardUrlWithData, { active: false, insert: true });
+                                    } else {
+                                        const opened = window.open(cardUrlWithData, '_blank');
+                                        if (!opened) {
+                                            console.warn('window.open was blocked by the browser or failed to open.');
+                                        }
                                     }
+                                } else {
+                                    console.log("Navigating current tab with encoded query: " + cardUrlWithData);
+                                    window.location.href = cardUrlWithData;
                                 }
 
                             } else {
