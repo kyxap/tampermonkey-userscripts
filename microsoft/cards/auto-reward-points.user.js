@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.1.3
+// @version      0.1.4
 // @description  Get Microsoft points automatically
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -10,6 +10,7 @@
 // @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/cards/auto-reward-points.user.js
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @grant        GM_xmlhttpRequest
+// @grant        GM_openInTab
 // ==/UserScript==
 
 const reloadInterval = 3600 * 5 * 1000; // 5 hours in milliseconds
@@ -28,7 +29,8 @@ const reloadInterval = 3600 * 5 * 1000; // 5 hours in milliseconds
 
 function findAndClick() {
     // The selector for the link you want to click
-    const cardsBaseCSS = '.ng-scope[ng-if="!$ctrl.locked && !$ctrl.isExclusiveLockedItem"] > .mee-icon-AddMedium[aria-label="plus"]'
+    //const cardsBaseCSS = '.ng-scope[ng-if="!$ctrl.locked && !$ctrl.isExclusiveLockedItem"] > .mee-icon-AddMedium[aria-label="plus"]'
+    const cardsBaseCSS = '.ng-scope[ng-if="!$ctrl.locked && !$ctrl.isExclusiveLockedItem"] > .image-icon'
     // first 3 card on top, only click needed
     const cardsDailySetCSS = '[points="$ctrl.item.points"] > * > ' + cardsBaseCSS
     const cardsMoreActivitiesCSS = '[points="item.points"] > * > ' + cardsBaseCSS;
@@ -71,10 +73,21 @@ function findAndClick() {
                         console.log(`Working on card with a text: "${cardText}"`);
                         askAI(cardText, function (result) {
                             if (result) {
-                                const cardUrlWithData = card.closest('a').href + `&data=${result}`
+                                const encodedQuery = encodeURIComponent(result);
+                                const link = card.closest('a');
+                                const baseHref = link ? link.href : window.location.href;
+                                const cardUrlWithData = baseHref + `&data=${encodedQuery}`;
 
-                                console.log("Url with query: " + cardUrlWithData)
-                                window.open(cardUrlWithData, '_blank');
+                                console.log("Final query for card:", result);
+                                console.log("Opening new tab with encoded query: " + cardUrlWithData);
+                                if (typeof GM_openInTab === 'function') {
+                                    GM_openInTab(cardUrlWithData, { active: false, insert: true });
+                                } else {
+                                    const opened = window.open(cardUrlWithData, '_blank');
+                                    if (!opened) {
+                                        console.warn('window.open was blocked by the browser or failed to open.');
+                                    }
+                                }
 
                             } else {
                                 console.error("No result received so going to open but next script will close it right a way");
@@ -93,23 +106,52 @@ function findAndClick() {
 function askAI(prompt, callback) {
     const task = `Generate a one-line search query based on the following task: ${prompt}. The query should be concise and directly relevant to the user's needs. Please avoid using quotes in your example`;
 
+    function buildFallbackQuery() {
+        try {
+            const cleaned = prompt
+                .replace(/[\u200B-\u200D\uFEFF]/g, '') // zero-width chars
+                .replace(/[,|]/g, ' ')
+                .replace(/[^\w\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            const words = cleaned.split(' ');
+            const fallback = words.slice(0, 10).join(' ');
+            return fallback || 'bing daily set';
+        } catch (e) {
+            console.error('Failed to build fallback query, using default.', e);
+            return 'bing daily set';
+        }
+    }
+
     // Call your Spring Boot API
     GM_xmlhttpRequest({
         method: "GET",
         url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(task)}`,
+        timeout: 4000,
         onload: function (response) {
             if (response.status === 200) {
                 const result = response.responseText;
                 console.log("Generated Query:", result);
-                callback(result); // Call the callback with the result
+                callback(result || buildFallbackQuery()); // Call the callback with the result
             } else {
-                console.error("Error:", response.statusText);
-                callback(null); // Call the callback with null or handle error as needed
+                console.error("Error from AI service, using fallback query instead:", response.status, response.statusText);
+                const fallback = buildFallbackQuery();
+                console.log('Fallback Query (service error):', fallback);
+                callback(fallback);
             }
         },
         onerror: function (error) {
-            console.error("Request failed:", error);
-            callback(null); // Call the callback with null
+            console.error("Request to local AI service failed, using fallback query instead:", error);
+            const fallback = buildFallbackQuery();
+            console.log('Fallback Query (request failure):', fallback);
+            callback(fallback);
+        },
+        ontimeout: function () {
+            console.error("Request to local AI service timed out, using fallback query instead.");
+            const fallback = buildFallbackQuery();
+            console.log('Fallback Query (timeout):', fallback);
+            callback(fallback);
         }
     });
 }
