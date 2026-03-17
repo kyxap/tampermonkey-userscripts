@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.6
+// @version      0.0.7
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
+// @grant        window.close
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
 // @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-do-the-search.user.js
 // @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-do-the-search.user.js
