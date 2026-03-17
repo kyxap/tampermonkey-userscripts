@@ -1,31 +1,46 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 1 of 3 | PC Searches Points Breakdown
-// @namespace    https://rewards.bing.com/
-// @version      0.1.2
-// @description  PC Searches Points Breakdown with Stuck Detection
-// @match        https://rewards.bing.com/pointsbreakdown
+// @namespace    https://github.com/kyxap/tampermonkey-userscripts/
+// @version      0.1.4
+// @description  PC Searches Points Breakdown with Robust Initialization
+// @match        https://rewards.bing.com/pointsbreakdown*
 // @grant        window.close
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @run-at       document-end
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
-// @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-pointsbreakdown.user.js
-// @downloadURL  https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-pointsbreakdown.user.js
-// @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @author       kyxap | https://github.com/kyxap
 // ==/UserScript==
 
 const searchesCounterCSS = `[ng-bind-html="$ctrl.pointProgressText"]`;
 const linkToPCSearchCSS = `#pointsCounters_pcSearchLevel2_0, #pointsCounters_pcSearch_0, [id^="pointsCounters_pcSearch"], a[href*="PC Search"]`;
-
-const reloadInterval = 3600 * 5 * 1000; 
-const BASE_WAIT = 12000; // Increase to 12s to respect new MS cooldowns
+const BASE_WAIT = 12000;
 
 (function () {
     'use strict';
-    window.onload = function () {
-        setTimeout(checkSearchCounts, 3000); // Give Angular time to load
-        setInterval(() => location.reload(), reloadInterval);
-    };
+    console.log("[PC] Script loaded, waiting for elements...");
+
+    function init() {
+        let attempts = 0;
+        const checkExist = setInterval(function() {
+            attempts++;
+            const counter = document.querySelector(searchesCounterCSS);
+            if (counter) {
+                console.log("[PC] Elements found, starting automation...");
+                clearInterval(checkExist);
+                checkSearchCounts();
+            } else if (attempts > 30) { // Stop checking after 30s
+                console.error("[PC] Could not find search counters after 30 seconds.");
+                clearInterval(checkExist);
+            }
+        }, 1000);
+    }
+
+    if (document.readyState === 'complete') init();
+    else window.addEventListener('load', init);
+
+    // Auto-reload after 5 hours
+    setInterval(() => location.reload(), 3600 * 5 * 1000);
 })();
 
 async function checkSearchCounts() {
@@ -50,19 +65,18 @@ async function checkSearchCounts() {
         let maxPC = getCount(pcCounter, 1);
         let stuckCount = 0;
 
-        console.log(`[PC] Current: ${lastCount}/${maxPC}`);
+        console.log(`[PC] Current Progress: ${lastCount}/${maxPC}`);
 
         for (let i = lastCount; i < maxPC; i++) {
             const pcLink = document.querySelector(linkToPCSearchCSS);
             if (!pcLink) {
-                console.error("PC Link not found!");
+                console.error("[PC] Search link vanished!");
                 break;
             }
 
             console.log(`[PC] Attempting search #${i + 1}...`);
             pcLink.click();
 
-            // Wait for cooldown
             await new Promise(r => setTimeout(r, BASE_WAIT + (stuckCount * 5000)));
 
             let currentCount = getCount(pcCounter, 0);
@@ -72,21 +86,20 @@ async function checkSearchCounts() {
                 stuckCount = 0;
             } else {
                 stuckCount++;
-                console.warn(`[PC] Count didn't change (${currentCount}). Stuck ${stuckCount} times. Increasing delay.`);
-                if (stuckCount > 3) {
-                    console.error("[PC] Stuck too long. You might have hit the 15-minute search limit. Stopping for now.");
+                console.warn(`[PC] Count didn't change. Stuck ${stuckCount}/3. Increasing delay.`);
+                if (stuckCount >= 3) {
+                    console.error("[PC] Search limit/cooldown hit. Stopping.");
                     break;
                 }
             }
         }
     }
 
-    // Trigger Mobile (as before)
     if (mobileCounter) {
         let doneMobile = getCount(mobileCounter, 0);
         let maxMobile = getCount(mobileCounter, 1);
         if (doneMobile < maxMobile) {
-            console.log("[Mobile] Triggering background searches...");
+            console.log(`[Mobile] Triggering ${Math.ceil((maxMobile - doneMobile)/3)} background searches...`);
             GM_setValue('triggerMobileSearch', {
                 count: Math.ceil((maxMobile - doneMobile) / 3),
                 timestamp: Date.now()

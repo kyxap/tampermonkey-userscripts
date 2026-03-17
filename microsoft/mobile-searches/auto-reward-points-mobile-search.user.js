@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Mobile Searches | Background Searcher
-// @namespace    https://www.bing.com/
-// @version      0.1.0
+// @namespace    https://github.com/kyxap/tampermonkey-userscripts/
+// @version      0.1.2
 // @description  Perform mobile searches in background via GM_xmlhttpRequest
 // @match        https://www.bing.com/*
+// @match        https://bing.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @run-at       document-end
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
 // @author       kyxap | https://github.com/kyxap
 // ==/UserScript==
@@ -14,25 +16,35 @@
 (function () {
     'use strict';
 
+    console.log("[Mobile Searcher] Initialized! Listening for trigger from Breakdown page...");
+
     // Check for trigger every 5 seconds
     setInterval(checkForTrigger, 5000);
 
     async function checkForTrigger() {
         const trigger = GM_getValue('triggerMobileSearch');
-        if (trigger && (Date.now() - trigger.timestamp < 60000)) { // Valid for 1 minute
-            console.log(`[Mobile Searcher] Trigger detected! Performing ${trigger.count} searches.`);
-            
-            // Clear trigger so we don't repeat
-            GM_setValue('triggerMobileSearch', null);
+        if (trigger) {
+            // Check if trigger is recent (last 2 minutes)
+            if (Date.now() - trigger.timestamp < 120000) {
+                console.log(`[Mobile Searcher] TRIGGER DETECTED! Count: ${trigger.count}`);
+                
+                // Clear trigger immediately
+                GM_setValue('triggerMobileSearch', null);
 
-            for (let i = 0; i < trigger.count; i++) {
-                const query = await getQuery();
-                console.log(`[Mobile Searcher] Search #${i + 1}: ${query}`);
-                await performMobileSearch(query);
-                // Random delay between 3-7 seconds to look human
-                await new Promise(r => setTimeout(r, 3000 + Math.random() * 4000));
+                for (let i = 0; i < trigger.count; i++) {
+                    const query = await getQuery();
+                    console.log(`[Mobile Searcher] Performing search ${i+1}/${trigger.count}: "${query}"`);
+                    await performMobileSearch(query);
+                    
+                    const delay = 6000 + Math.random() * 6000;
+                    console.log(`[Mobile Searcher] Waiting ${Math.round(delay/1000)}s for next search...`);
+                    await new Promise(r => setTimeout(r, delay));
+                }
+                console.log("[Mobile Searcher] Background searches complete.");
+            } else {
+                console.warn("[Mobile Searcher] Found expired trigger, clearing.");
+                GM_setValue('triggerMobileSearch', null);
             }
-            console.log("[Mobile Searcher] All background searches complete.");
         }
     }
 
@@ -54,15 +66,13 @@
     }
 
     function getRandomFallbackQuery() {
-        const items = ["weather", "pizza near me", "best movies 2024", "how to bake cake", "stock market", "latest news", "top travel destinations", "workout routine"];
+        const items = ["weather", "pizza", "news", "how to", "best books", "movies", "games", "travel"];
         return items[Math.floor(Math.random() * items.length)] + " " + Math.floor(Math.random() * 100);
     }
 
     function performMobileSearch(query) {
         return new Promise((resolve) => {
-            // Android / Chrome Mobile User-Agent
             const mobileUA = "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
-            
             GM_xmlhttpRequest({
                 method: "GET",
                 url: `https://www.bing.com/search?q=${encodeURIComponent(query)}&PC=OPALIOS&form=LWS001&s_it=mobile`,
@@ -70,14 +80,8 @@
                     "User-Agent": mobileUA,
                     "Referer": "https://www.bing.com/"
                 },
-                onload: (res) => {
-                    console.log(`[Mobile Searcher] Search request sent for: ${query}`);
-                    resolve();
-                },
-                onerror: (err) => {
-                    console.error("[Mobile Searcher] Search failed:", err);
-                    resolve();
-                }
+                onload: () => resolve(),
+                onerror: () => resolve()
             });
         });
     }
