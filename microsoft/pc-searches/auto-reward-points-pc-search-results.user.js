@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 3 of 3 | Search cleanup
 // @namespace    https://www.bing.com/news/
-// @version      0.0.2
+// @version      0.0.3
 // @description  Search cleanup
 // @match        https://www.bing.com/news/search?q=*
 // @grant        GM_xmlhttpRequest
@@ -16,7 +16,7 @@
 (function () {
     'use strict';
 
-    const timeout = 5000; // Set your desired timeout in milliseconds
+    const timeout = 12000; // Increase to 12s to ensure search is registered
     setTimeout(function () {
         // Close the tab after the timeout
         window.close();
