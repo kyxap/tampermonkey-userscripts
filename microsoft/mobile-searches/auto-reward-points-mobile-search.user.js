@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Mobile Searches | Background Searcher
 // @namespace    https://github.com/kyxap/tampermonkey-userscripts/
-// @version      0.1.3
-// @description  Perform both PC and Mobile background searches
+// @version      0.1.4
+// @description  Perform Mobile background searches ONLY
 // @match        https://www.bing.com/*
 // @match        https://bing.com/*
 // @grant        GM_xmlhttpRequest
@@ -16,46 +16,28 @@
 (function () {
     'use strict';
 
-    console.log("[Background Searcher] Initialized! Listening for triggers...");
+    console.log("[Background Searcher] Mobile background searcher initialized!");
 
-    // UA strings
-    const PC_UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     const MOBILE_UA = "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
 
     setInterval(checkForTrigger, 5000);
 
     async function checkForTrigger() {
         const trigger = GM_getValue('triggerSearches');
-        if (trigger && (Date.now() - trigger.timestamp < 120000)) {
-            console.log(`[Background Searcher] TRIGGER RECEIVED: PC=${trigger.pcCount}, Mobile=${trigger.mobileCount}`);
+        if (trigger && trigger.mobileCount > 0 && (Date.now() - trigger.timestamp < 120000)) {
+            console.log(`[Background Searcher] MOBILE TRIGGER: ${trigger.mobileCount} searches.`);
             GM_setValue('triggerSearches', null);
 
-            // Do Mobile first (often faster)
-            if (trigger.mobileCount > 0) {
-                console.log(`[Background Searcher] Starting ${trigger.mobileCount} Mobile searches...`);
-                await processSearches(trigger.mobileCount, MOBILE_UA, "Mobile");
+            for (let i = 0; i < trigger.mobileCount; i++) {
+                const query = await getQuery();
+                console.log(`[Background Searcher] [Mobile] #${i+1}/${trigger.mobileCount}: ${query}`);
+                await performSearch(query, MOBILE_UA);
+                
+                const delay = 10000 + Math.random() * 5000;
+                console.log(`[Background Searcher] Waiting ${Math.round(delay/1000)}s...`);
+                await new Promise(r => setTimeout(r, delay));
             }
-
-            // Then PC
-            if (trigger.pcCount > 0) {
-                console.log(`[Background Searcher] Starting ${trigger.pcCount} PC searches...`);
-                await processSearches(trigger.pcCount, PC_UA, "PC");
-            }
-
-            console.log("[Background Searcher] All triggered searches complete.");
-        }
-    }
-
-    async function processSearches(count, ua, type) {
-        for (let i = 0; i < count; i++) {
-            const query = await getQuery();
-            console.log(`[Background Searcher] [${type}] #${i+1}/${count}: ${query}`);
-            await performSearch(query, ua);
-            
-            // Random delay between 10-15 seconds to be very safe with new cooldowns
-            const delay = 10000 + Math.random() * 5000;
-            console.log(`[Background Searcher] Waiting ${Math.round(delay/1000)}s...`);
-            await new Promise(r => setTimeout(r, delay));
+            console.log("[Background Searcher] All triggered mobile searches complete.");
         }
     }
 
