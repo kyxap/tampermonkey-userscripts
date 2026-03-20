@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.1.9
-// @description  Get Microsoft points automatically (with status logging)
+// @version      0.2.0
+// @description  Get Microsoft points automatically (with status logging and click limits)
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
@@ -11,6 +11,8 @@
 // @supportURL   https://github.com/kyxap/tampermonkey-userscripts/issues
 // @grant        GM_xmlhttpRequest
 // @grant        GM_openInTab
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 const reloadInterval = 3600 * 5 * 1000; // 5 hours in milliseconds
@@ -18,6 +20,8 @@ const reloadInterval = 3600 * 5 * 1000; // 5 hours in milliseconds
 const openSearchInNewTab = true;
 // Always use this for "More Activities" search tabs so we never open rewards.bing.com and loop
 const BING_REWARDS_SEARCH_BASE = 'https://www.bing.com/?form=ML2PCR&OCID=ML2PCR&PUBL=RewardsDO&CREA=ML2PCR&PC=ML2PCR&rwAutoFlyout=exb';
+
+const MAX_CLICKS_PER_CARD = 3;
 
 (function () {
     'use strict';
@@ -29,6 +33,15 @@ const BING_REWARDS_SEARCH_BASE = 'https://www.bing.com/?form=ML2PCR&OCID=ML2PCR&
     console.log(`> Last updated: ${now.toLocaleTimeString()}`);
     console.log(`> Next scheduled reload: ${reloadTime.toLocaleTimeString()}`);
     console.log(`-----------------------------------------`);
+
+    // Reset click counts if it's a new day
+    const lastResetDate = GM_getValue('lastResetDate', '');
+    const todayStr = now.toDateString();
+    if (lastResetDate !== todayStr) {
+        console.log('[Cards Automation] New day detected, resetting click counts.');
+        GM_setValue('clickCounts', {});
+        GM_setValue('lastResetDate', todayStr);
+    }
 
     // Avoid recursive loops: if this rewards page was opened with a "data"
     // query parameter (from our own script), do nothing here.
@@ -51,6 +64,17 @@ const BING_REWARDS_SEARCH_BASE = 'https://www.bing.com/?form=ML2PCR&OCID=ML2PCR&
     }, reloadInterval);
 
 })();
+
+function getClickCount(cardId) {
+    const counts = GM_getValue('clickCounts', {});
+    return counts[cardId] || 0;
+}
+
+function incrementClickCount(cardId) {
+    const counts = GM_getValue('clickCounts', {});
+    counts[cardId] = (counts[cardId] || 0) + 1;
+    GM_setValue('clickCounts', counts);
+}
 
 function findAndClick() {
     // Base selector for clickable icon/image inside a card.
@@ -79,9 +103,17 @@ function findAndClick() {
                             return;
                         }
                         const cardText = data.getAttribute('aria-label') || '';
+                        
+                        // Check click limit
+                        const clickCount = getClickCount(cardText);
+                        if (clickCount >= MAX_CLICKS_PER_CARD) {
+                            console.log(`Skipping card "${cardText}" because it was clicked ${clickCount} times already today.`);
+                            return;
+                        }
 
-                        console.log(`Working on card with a text: "${cardText}"`);
+                        console.log(`Working on card with a text: "${cardText}" (Click ${clickCount + 1}/${MAX_CLICKS_PER_CARD})`);
                         card.click();
+                        incrementClickCount(cardText);
                         // another script will close opened tab
                     }
                 )
@@ -99,9 +131,9 @@ function findAndClick() {
                             console.log('Skipping more-activities card that points back to rewards.bing.com to avoid loops:', link.href);
                             return;
                         }
+                        
                         // click on card, since there a chance that this one need click without any custom search
                         // TODO: identify this case and avoid this if is not needed
-                        card.click();
 
                         // extract text from cards description and ask AI
                         const data = card.closest('.rewards-card-container') || card.closest('.ds-card-sec');
@@ -110,8 +142,18 @@ function findAndClick() {
                             return;
                         }
                         const cardText = data.getAttribute('aria-label') || '';
+                        
+                        // Check click limit
+                        const clickCount = getClickCount(cardText);
+                        if (clickCount >= MAX_CLICKS_PER_CARD) {
+                            console.log(`Skipping more-activities card "${cardText}" because it was clicked ${clickCount} times already today.`);
+                            return;
+                        }
 
-                        console.log(`Working on card with a text: "${cardText}"`);
+                        console.log(`Working on card with a text: "${cardText}" (Click ${clickCount + 1}/${MAX_CLICKS_PER_CARD})`);
+                        card.click();
+                        incrementClickCount(cardText);
+
                         askAI(cardText, function (result) {
                             if (result) {
                                 const encodedQuery = encodeURIComponent(result);
@@ -157,8 +199,18 @@ function findAndClick() {
                                 return;
                             }
                             const cardText = data.getAttribute('aria-label');
+                            
+                            // Check click limit
+                            const clickCount = getClickCount(cardText);
+                            if (clickCount >= MAX_CLICKS_PER_CARD) {
+                                console.log(`Skipping fallback card "${cardText}" because it was clicked ${clickCount} times already today.`);
+                                return;
+                            }
 
-                            console.log(`(Fallback) Working on card with a text: "${cardText}"`);
+                            console.log(`(Fallback) Working on card with a text: "${cardText}" (Click ${clickCount + 1}/${MAX_CLICKS_PER_CARD})`);
+                            card.click();
+                            incrementClickCount(cardText);
+
                             askAI(cardText, function (result) {
                                 if (result) {
                                     const encodedQuery = encodeURIComponent(result);
