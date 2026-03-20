@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Easy Apply -> make it even easier
-// @version      0.1.4
+// @version      0.1.5
 // @description  Makes "Easy Apply" actually easy: 1) auto uncheck company to follow 2) closes pop after submit
 // @author       kyxap | https://github.com/kyxap
 // @match        https://www.linkedin.com/*
@@ -21,7 +21,8 @@
         "https://www.linkedin.com/jobs/search/",
         "https://www.linkedin.com/jobs/collections/",
         "https://www.linkedin.com/jobs/search-results/",
-        "https://www.linkedin.com/preload/"
+        "https://www.linkedin.com/preload/",
+        "https://www.linkedin.com/jobs/view/"
     ];
 
     // Create a debounced version of the start function
