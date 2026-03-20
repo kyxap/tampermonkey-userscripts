@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Mobile Searches | Background Searcher
 // @namespace    https://github.com/kyxap/tampermonkey-userscripts/
-// @version      0.1.4
+// @version      0.1.6
 // @description  Perform Mobile background searches ONLY
 // @match        https://www.bing.com/*
 // @match        https://bing.com/*
@@ -39,15 +39,15 @@
             }
             console.log("[Background Searcher] All triggered mobile searches complete.");
         }
-    // @version      0.1.5
-    ...
-        async function getQuery() {
-            return new Promise((resolve) => {
-                GM_xmlhttpRequest({
-                    method: "GET",
-                    url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent("One-line unique search query, no quotes.")}`,
-                    timeout: 10000,
-                    onload: (res) => {
+    }
+
+    async function getQuery() {
+        return new Promise((resolve) => {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent("One-line unique search query, no quotes.")}`,
+                timeout: 30000,
+                onload: (res) => {
                     if (res.status === 200) resolve(res.responseText.trim());
                     else resolve(getRandomFallbackQuery());
                 },

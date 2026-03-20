@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.8
+// @version      0.0.9
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
@@ -77,7 +77,7 @@ function askAI(prompt, callback) {
     GM_xmlhttpRequest({
         method: "GET",
         url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(prompt)}`,
-        timeout: 10000,
+        timeout: 30000,
         onload: function (response) {
             if (response.status === 200) {
                 const result = response.responseText;

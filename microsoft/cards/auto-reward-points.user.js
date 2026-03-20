@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.1.7
+// @version      0.1.9
 // @description  Get Microsoft points automatically (with status logging)
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -217,14 +217,14 @@ function askAI(prompt, callback) {
             console.error('Failed to build fallback query, using default.', e);
             return 'bing daily set';
         }
-    // @version      0.1.8
-    ...
-        // Call your Spring Boot API
-        GM_xmlhttpRequest({
-            method: "GET",
-            url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(task)}`,
-            timeout: 10000,
-            onload: function (response) {
+    }
+
+    // Call your Spring Boot API
+    GM_xmlhttpRequest({
+        method: "GET",
+        url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(task)}`,
+        timeout: 30000,
+        onload: function (response) {
             if (response.status === 200) {
                 const result = response.responseText;
                 console.log("Generated Query:", result);
