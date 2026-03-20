@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.2.0
-// @description  Get Microsoft points automatically (with status logging and click limits)
+// @version      0.2.1
+// @description  Get Microsoft points automatically (with status logging, click limits, and debug UI)
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
@@ -13,6 +13,7 @@
 // @grant        GM_openInTab
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_addStyle
 // ==/UserScript==
 
 const reloadInterval = 3600 * 5 * 1000; // 5 hours in milliseconds
@@ -22,6 +23,7 @@ const openSearchInNewTab = true;
 const BING_REWARDS_SEARCH_BASE = 'https://www.bing.com/?form=ML2PCR&OCID=ML2PCR&PUBL=RewardsDO&CREA=ML2PCR&PC=ML2PCR&rwAutoFlyout=exb';
 
 const MAX_CLICKS_PER_CARD = 3;
+const DEFAULT_AI_BASE_URL = 'http://localhost:5433';
 
 (function () {
     'use strict';
@@ -55,6 +57,7 @@ const MAX_CLICKS_PER_CARD = 3;
         console.warn('[Auto Rewards Cards] Failed to inspect URL parameters, continuing anyway.', e);
     }
 
+    createDebugUI();
     findAndClick();
 
     // Set interval to reload the page every n hours and start over
@@ -64,6 +67,74 @@ const MAX_CLICKS_PER_CARD = 3;
     }, reloadInterval);
 
 })();
+
+function createDebugUI() {
+    GM_addStyle(`
+        #rewards-debug-ui {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fff;
+            border: 2px solid #00a1f1;
+            padding: 10px;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-family: sans-serif;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        #rewards-debug-ui h3 { margin: 0 0 5px 0; font-size: 14px; color: #00a1f1; }
+        #rewards-debug-ui button {
+            background: #00a1f1;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #rewards-debug-ui button:hover { background: #0078d4; }
+        #rewards-debug-ui input {
+            border: 1px solid #ccc;
+            padding: 3px;
+            border-radius: 4px;
+        }
+    `);
+
+    const container = document.createElement('div');
+    container.id = 'rewards-debug-ui';
+    container.innerHTML = `
+        <h3>Rewards Debug</h3>
+        <button id="btn-reset-clicks">Reset Click Counts</button>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+            <label>AI URL:</label>
+            <input type="text" id="ai-url-input" placeholder="http://localhost:5433">
+            <button id="btn-save-ai-url">Save URL</button>
+        </div>
+    `;
+    document.body.appendChild(container);
+
+    const aiUrlInput = document.getElementById('ai-url-input');
+    aiUrlInput.value = GM_getValue('aiBaseUrl', DEFAULT_AI_BASE_URL);
+
+    document.getElementById('btn-reset-clicks').onclick = () => {
+        GM_setValue('clickCounts', {});
+        console.log('[Debug UI] Click counts reset.');
+        alert('Click counts reset for all cards!');
+    };
+
+    document.getElementById('btn-save-ai-url').onclick = () => {
+        const newUrl = aiUrlInput.value.trim();
+        if (newUrl) {
+            GM_setValue('aiBaseUrl', newUrl);
+            console.log(`[Debug UI] AI Base URL saved: ${newUrl}`);
+            alert(`AI Base URL saved: ${newUrl}`);
+        }
+    };
+}
 
 function getClickCount(cardId) {
     const counts = GM_getValue('clickCounts', {});
@@ -90,7 +161,7 @@ function findAndClick() {
     // Wait for the page to load and then execute the script
     window.addEventListener('load', function () {
             let cardMoreActivitiesElements = document.querySelectorAll(cardsMoreActivitiesCSS);
-            const cardDailySetElements = document.querySelectorAll(cardsDailySetCSS);
+            const cardDailySetElements = document.querySelectorAll(cardDailySetCSS);
 
             // top 3 cards that need only click without custom search query
             if (cardDailySetElements.length > 0) {
@@ -252,6 +323,7 @@ function findAndClick() {
 // requires AI chat model to work on your local, let me know if you interested and I can share this project
 function askAI(prompt, callback) {
     const task = `Generate a one-line search query based on the following task: ${prompt}. The query should be concise and directly relevant to the user's needs. Please avoid using quotes in your example`;
+    const aiBaseUrl = GM_getValue('aiBaseUrl', DEFAULT_AI_BASE_URL);
 
     function buildFallbackQuery() {
         try {
@@ -271,10 +343,10 @@ function askAI(prompt, callback) {
         }
     }
 
-    // Call your Spring Boot API
+    // Call your AI API
     GM_xmlhttpRequest({
         method: "GET",
-        url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(task)}`,
+        url: `${aiBaseUrl}/api/generate?prompt=${encodeURIComponent(task)}`,
         timeout: 30000,
         onload: function (response) {
             if (response.status === 200) {
