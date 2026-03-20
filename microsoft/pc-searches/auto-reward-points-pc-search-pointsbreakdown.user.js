@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 1 of 3 | PC Searches Points Breakdown
 // @namespace    https://github.com/kyxap/tampermonkey-userscripts/
-// @version      0.1.6
-// @description  PC Searches Points Breakdown (Sequential Tab-based searching with stuck detection)
+// @version      0.1.7
+// @description  PC Searches Points Breakdown (Sequential Tab-based searching with status logging)
 // @match        https://rewards.bing.com/pointsbreakdown*
 // @grant        window.close
 // @grant        GM_setValue
@@ -16,12 +16,20 @@ const searchesCounterCSS = `[ng-bind-html="$ctrl.pointProgressText"]`;
 const linkToPCSearchCSS = `#pointsCounters_pcSearchLevel2_0, #pointsCounters_pcSearch_0, [id^="pointsCounters_pcSearch"], a[href*="PC Search"]`;
 
 // COOLDOWN SETTINGS
-const BASE_WAIT = 25000; // 25s - Give Microsoft enough time to count the search and close the tab
-const RELOAD_IF_STUCK = 15 * 60 * 1000; // 15 minutes cooldown
+const BASE_WAIT = 25000; // 25s
+const RELOAD_INTERVAL = 3600 * 5 * 1000; // 5 hours
+const STUCK_RELOAD_DELAY = 15 * 60 * 1000; // 15 minutes
 
 (function () {
     'use strict';
-    console.log("[PC] Breakdown script loaded. Starting in 5s...");
+    
+    const now = new Date();
+    const reloadTime = new Date(now.getTime() + RELOAD_INTERVAL);
+    
+    console.log(`%c[PC Breakdown] Status Update:`, 'font-weight: bold; color: #00a1f1;');
+    console.log(`> Last updated: ${now.toLocaleTimeString()}`);
+    console.log(`> Next scheduled reload: ${reloadTime.toLocaleTimeString()}`);
+    console.log(`-----------------------------------------`);
 
     function init() {
         let attempts = 0;
@@ -39,8 +47,13 @@ const RELOAD_IF_STUCK = 15 * 60 * 1000; // 15 minutes cooldown
         }, 1000);
     }
 
-    // Give the page 5 seconds to stabilize (Angular is slow)
     setTimeout(init, 5000);
+
+    // Scheduled reload
+    setInterval(() => {
+        console.log("[PC] Scheduled reload triggered.");
+        location.reload();
+    }, RELOAD_INTERVAL);
 
 })();
 
@@ -79,16 +92,13 @@ async function processSearches() {
             console.log(`[PC] Attempting search. Target: ${lastCount + 3}/${maxPC}`);
             pcLink.click();
 
-            // Wait for search tab to open, do the search, and close itself (15s script + network)
             console.log(`[PC] Waiting ${BASE_WAIT/1000}s for point update...`);
             await new Promise(r => setTimeout(r, BASE_WAIT));
 
-            // Refresh counts (we might need a real reload if the points don't update dynamically)
-            // But let's try to trust Angular for a few attempts.
             let currentCount = getCount(pcCounter, 0);
             
             if (currentCount > lastCount) {
-                console.log(`[PC] SUCCESS! Points increased: ${lastCount} -> ${currentCount}`);
+                console.log(`[PC] SUCCESS! Points increased: ${lastCount} -> ${currentCount} (Updated at: ${new Date().toLocaleTimeString()})`);
                 lastCount = currentCount;
                 stuckCount = 0;
             } else {
@@ -96,14 +106,13 @@ async function processSearches() {
                 console.warn(`[PC] Points didn't update (Attempt ${stuckCount}/3).`);
                 
                 if (stuckCount >= 3) {
-                    console.error(`[PC] STUCK DETECTED! You likely hit the 15-minute cooldown (3 searches per 15 mins).`);
-                    console.log(`[PC] Waiting 15 minutes before next attempt...`);
-                    // We'll just refresh the page in 15 minutes to try again.
-                    setTimeout(() => location.reload(), RELOAD_IF_STUCK);
+                    const nextAttempt = new Date(new Date().getTime() + STUCK_RELOAD_DELAY);
+                    console.error(`[PC] STUCK! 15-min cooldown likely active.`);
+                    console.log(`[PC] Next attempt scheduled for: ${nextAttempt.toLocaleTimeString()}`);
+                    setTimeout(() => location.reload(), STUCK_RELOAD_DELAY);
                     return;
                 }
                 
-                // If not totally stuck, try a real page refresh to force update counts
                 console.log("[PC] Refreshing breakdown page to force point update...");
                 location.reload();
                 return;
@@ -112,7 +121,6 @@ async function processSearches() {
         console.log("[PC] All PC searches complete!");
     }
 
-    // Handle Mobile separately in background (it still works for some!)
     if (mobileCounter) {
         let doneMobile = getCount(mobileCounter, 0);
         let maxMobile = getCount(mobileCounter, 1);

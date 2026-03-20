@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 3 of 3 | Closes search results
 // @namespace    https://www.bing.com/
-// @version      0.0.13
+// @version      0.0.14
 // @description  Closes search results and miscellaneous promo pages
 // @match        https://www.bing.com/search?form=&q=*
 // @match        https://www.bing.com/search?q=*
@@ -11,6 +11,7 @@
 // @match        https://rewards.bing.com/sweepstakes/*
 // @match        https://rewards.bing.com/redeem/*
 // @match        https://rewards.bing.com/referandearn/*
+// @match        https://rewards.bing.com/dashboard*
 // @match        https://www.xbox.com/*/xbox-mastercard*
 // @grant        window.close
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
