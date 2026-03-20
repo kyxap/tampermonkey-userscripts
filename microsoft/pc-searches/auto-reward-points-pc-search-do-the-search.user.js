@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
-// @namespace    https://rewards.bing.com/
-// @version      0.0.9
-// @description  Do the search
+// @namespace    https://github.com/kyxap/tampermonkey-userscripts/
+// @version      0.1.0
+// @description  Do the search (unified namespace and configurable AI URL)
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
+// @grant        GM_getValue
 // @grant        window.close
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
 // @updateURL    https://github.com/kyxap/tampermonkey-userscripts/raw/main/microsoft/pc-searches/auto-reward-points-pc-search-do-the-search.user.js
@@ -15,33 +16,25 @@
 
 const aiRequest = "Please give me one example of human like search request for search engines line google one liner. Please avoid using quotes in your example";
 const timeout = 5 * 1000; // 5 sec
+const DEFAULT_AI_BASE_URL = 'http://localhost:5433';
 
 (function () {
     'use strict';
 
     // Function to simulate typing
     function simulateTextareaInput(textareaElement, text) {
-        // Set the textarea element's value
         textareaElement.value = text;
-
-        // Create and dispatch an input event to simulate typing
-        const inputEvent = new Event('input', {
-            bubbles: true,
-            cancelable: true
-        });
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
         textareaElement.dispatchEvent(inputEvent);
-
-        document.getElementById("sb_form_go").click(); // click on search
+        document.getElementById("sb_form_go").click();
     }
 
-    // Find the input element using its ID
     const inputElement = document.getElementById('sb_form_q');
 
     if (inputElement) {
         askAI(aiRequest, function (result) {
             if (result) {
                 console.log("Query received from ai: " + result)
-                // Simulate typing in the input element
                 simulateTextareaInput(inputElement, result);
             } else {
                 console.error("No result received from AI");
@@ -51,58 +44,38 @@ const timeout = 5 * 1000; // 5 sec
         console.log("Input element not found");
     }
 
-    // Optional: Set a timeout to close the tab after a delay
     setTimeout(function () {
-        // Close the tab after the timeout
         window.close();
     }, timeout);
 })();
 
-// List of items and colors
-const items = ["car", "shirt", "laptop", "bike", "hat", "paint", "pen", "shoes"];
-const colors = ["red", "blue", "green", "yellow", "purple", "dark", "grey", "black"];
-
-// Function to generate random search text
 function generateRandomSearchText() {
-    // Pick random item and color
-    const randomItem = items[Math.floor(Math.random() * items.length)];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-    return randomColor + " " + randomItem;
+    const items = ["car", "shirt", "laptop", "bike", "hat", "paint", "pen", "shoes"];
+    const colors = ["red", "blue", "green", "yellow", "purple", "dark", "grey", "black"];
+    return colors[Math.floor(Math.random() * colors.length)] + " " + items[Math.floor(Math.random() * items.length)];
 }
 
-// requires AI chat model to work on your local, let me know if you interested and I can share this project
 function askAI(prompt, callback) {
-    // Call your Spring Boot API
+    const aiBaseUrl = GM_getValue('aiBaseUrl', DEFAULT_AI_BASE_URL);
     GM_xmlhttpRequest({
         method: "GET",
-        url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(prompt)}`,
+        url: `${aiBaseUrl}/api/generate?prompt=${encodeURIComponent(prompt)}`,
         timeout: 30000,
         onload: function (response) {
             if (response.status === 200) {
-                const result = response.responseText;
-                console.log("Generated Query:", result);
-                callback(result); // Call the callback with the result
+                callback(response.responseText);
             } else {
-                console.error("Error:", response.statusText);
-                console.error("No result received from AI, going to use random static data");
-                const rndStatic = generateRandomSearchText();
-                console.log("Query generated from static data: " + rndStatic)
-                callback(rndStatic);
+                console.error("AI service error, using fallback.");
+                callback(generateRandomSearchText());
             }
         },
         onerror: function (error) {
-            console.error("Request failed:", error);
-            console.error("No result received from AI, going to use random static data");
-            const rndStatic = generateRandomSearchText();
-            console.log("Query generated from static data: " + rndStatic)
-            callback(rndStatic);
+            console.error("AI request failed, using fallback.");
+            callback(generateRandomSearchText());
         },
         ontimeout: function () {
-            console.error("Request to local AI service timed out, using fallback query instead.");
-            const fallback = generateRandomSearchText();
-            console.log('Fallback Query (timeout):', fallback);
-            callback(fallback);
+            console.error("AI request timed out, using fallback.");
+            callback(generateRandomSearchText());
         }
     });
 }

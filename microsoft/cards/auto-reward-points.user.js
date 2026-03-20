@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
-// @namespace    https://rewards.bing.com
-// @version      0.2.2
+// @namespace    https://github.com/kyxap/tampermonkey-userscripts/
+// @version      0.2.3
 // @description  Get Microsoft points automatically (with status logging, click limits, and debug UI)
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*

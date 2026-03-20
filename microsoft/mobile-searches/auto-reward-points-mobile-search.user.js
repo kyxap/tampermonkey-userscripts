@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Mobile Searches | Background Searcher
 // @namespace    https://github.com/kyxap/tampermonkey-userscripts/
-// @version      0.1.6
-// @description  Perform Mobile background searches ONLY
+// @version      0.1.7
+// @description  Perform Mobile background searches ONLY (with configurable AI URL)
 // @match        https://www.bing.com/*
 // @match        https://bing.com/*
 // @grant        GM_xmlhttpRequest
@@ -19,6 +19,7 @@
     console.log("[Background Searcher] Mobile background searcher initialized!");
 
     const MOBILE_UA = "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
+    const DEFAULT_AI_BASE_URL = 'http://localhost:5433';
 
     setInterval(checkForTrigger, 5000);
 
@@ -42,10 +43,11 @@
     }
 
     async function getQuery() {
+        const aiBaseUrl = GM_getValue('aiBaseUrl', DEFAULT_AI_BASE_URL);
         return new Promise((resolve) => {
             GM_xmlhttpRequest({
                 method: "GET",
-                url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent("One-line unique search query, no quotes.")}`,
+                url: `${aiBaseUrl}/api/generate?prompt=${encodeURIComponent("One-line unique search query, no quotes.")}`,
                 timeout: 30000,
                 onload: (res) => {
                     if (res.status === 200) resolve(res.responseText.trim());

@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 1 of 3 | PC Searches Points Breakdown
 // @namespace    https://github.com/kyxap/tampermonkey-userscripts/
-// @version      0.1.8
-// @description  PC Searches Points Breakdown (Sequential Tab-based searching with persisted stuck detection)
+// @version      0.1.9
+// @description  PC Searches Points Breakdown (with status logging, stuck detection and debug UI)
 // @match        https://rewards.bing.com/pointsbreakdown*
 // @grant        window.close
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_addStyle
 // @run-at       document-end
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
 // @author       kyxap | https://github.com/kyxap
@@ -16,9 +17,10 @@ const searchesCounterCSS = `[ng-bind-html="$ctrl.pointProgressText"]`;
 const linkToPCSearchCSS = `#pointsCounters_pcSearchLevel2_0, #pointsCounters_pcSearch_0, [id^="pointsCounters_pcSearch"], a[href*="PC Search"]`;
 
 // COOLDOWN SETTINGS
-const BASE_WAIT = 30000; // Increased to 30s to be even safer
+const BASE_WAIT = 30000; // 30s
 const RELOAD_INTERVAL = 3600 * 5 * 1000; // 5 hours
 const STUCK_RELOAD_DELAY = 15 * 60 * 1000; // 15 minutes
+const DEFAULT_AI_BASE_URL = 'http://localhost:5433';
 
 (function () {
     'use strict';
@@ -30,6 +32,8 @@ const STUCK_RELOAD_DELAY = 15 * 60 * 1000; // 15 minutes
     console.log(`> Last updated: ${now.toLocaleTimeString()}`);
     console.log(`> Next scheduled reload: ${reloadTime.toLocaleTimeString()}`);
     console.log(`-----------------------------------------`);
+
+    createDebugUI();
 
     function init() {
         let attempts = 0;
@@ -57,6 +61,76 @@ const STUCK_RELOAD_DELAY = 15 * 60 * 1000; // 15 minutes
 
 })();
 
+function createDebugUI() {
+    GM_addStyle(`
+        #rewards-debug-ui {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fff;
+            border: 2px solid #00a1f1;
+            padding: 10px;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-family: sans-serif;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        #rewards-debug-ui h3 { margin: 0 0 5px 0; font-size: 14px; color: #00a1f1; }
+        #rewards-debug-ui button {
+            background: #00a1f1;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #rewards-debug-ui button:hover { background: #0078d4; }
+        #rewards-debug-ui input {
+            border: 1px solid #ccc;
+            padding: 3px;
+            border-radius: 4px;
+        }
+    `);
+
+    const container = document.createElement('div');
+    container.id = 'rewards-debug-ui';
+    container.innerHTML = `
+        <h3>Search Debug</h3>
+        <button id="btn-reset-stuck">Reset PC Stuck Count</button>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+            <label>AI URL:</label>
+            <input type="text" id="ai-url-input" placeholder="http://localhost:5433">
+            <button id="btn-save-ai-url">Save URL</button>
+        </div>
+    `;
+    document.body.appendChild(container);
+
+    const aiUrlInput = document.getElementById('ai-url-input');
+    aiUrlInput.value = GM_getValue('aiBaseUrl', DEFAULT_AI_BASE_URL);
+
+    document.getElementById('btn-reset-stuck').onclick = () => {
+        GM_setValue('pc_stuck_count', 0);
+        GM_setValue('pc_stuck_timestamp', 0);
+        console.log('[Debug UI] PC Stuck count reset.');
+        alert('PC Stuck count reset! Script will try searching again.');
+        location.reload();
+    };
+
+    document.getElementById('btn-save-ai-url').onclick = () => {
+        const newUrl = aiUrlInput.value.trim();
+        if (newUrl) {
+            GM_setValue('aiBaseUrl', newUrl);
+            console.log(`[Debug UI] AI Base URL saved: ${newUrl}`);
+            alert(`AI Base URL saved: ${newUrl}`);
+        }
+    };
+}
+
 async function processSearches() {
     function getCount(el, idx) {
         if (!el || !el.textContent) return 0;
@@ -78,11 +152,9 @@ async function processSearches() {
         let lastCount = getCount(pcCounter, 0);
         let maxPC = getCount(pcCounter, 1);
         
-        // PERSISTED STUCK DETECTION
         let stuckCount = GM_getValue('pc_stuck_count', 0);
         const lastStuckTimestamp = GM_getValue('pc_stuck_timestamp', 0);
         
-        // If we are currently in a 15-minute cooldown, don't do anything
         if (Date.now() - lastStuckTimestamp < STUCK_RELOAD_DELAY) {
             const remaining = Math.round((STUCK_RELOAD_DELAY - (Date.now() - lastStuckTimestamp)) / 60000);
             console.warn(`[PC] In cooldown. Waiting ${remaining} more minutes.`);
@@ -110,9 +182,8 @@ async function processSearches() {
             
             if (currentCount > lastCount) {
                 console.log(`[PC] SUCCESS! Points increased: ${lastCount} -> ${currentCount} (Updated at: ${new Date().toLocaleTimeString()})`);
-                GM_setValue('pc_stuck_count', 0); // Reset stuck count
+                GM_setValue('pc_stuck_count', 0); 
                 lastCount = currentCount;
-                // Continue to next search in loop or reload to refresh DOM
                 location.reload(); 
             } else {
                 stuckCount++;
@@ -133,7 +204,7 @@ async function processSearches() {
             }
         } else {
             console.log("[PC] All PC searches complete!");
-            GM_setValue('pc_stuck_count', 0); // Clear for next day
+            GM_setValue('pc_stuck_count', 0); 
         }
     }
 
