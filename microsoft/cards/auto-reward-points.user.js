@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.1.6
-// @description  Get Microsoft points automatically
+// @version      0.1.7
+// @description  Get Microsoft points automatically (with status logging)
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=bing.com
@@ -22,6 +22,14 @@ const BING_REWARDS_SEARCH_BASE = 'https://www.bing.com/?form=ML2PCR&OCID=ML2PCR&
 (function () {
     'use strict';
 
+    const now = new Date();
+    const reloadTime = new Date(now.getTime() + reloadInterval);
+    
+    console.log(`%c[Cards Automation] Status Update:`, 'font-weight: bold; color: #ffb900;');
+    console.log(`> Last updated: ${now.toLocaleTimeString()}`);
+    console.log(`> Next scheduled reload: ${reloadTime.toLocaleTimeString()}`);
+    console.log(`-----------------------------------------`);
+
     // Avoid recursive loops: if this rewards page was opened with a "data"
     // query parameter (from our own script), do nothing here.
     try {
@@ -38,6 +46,7 @@ const BING_REWARDS_SEARCH_BASE = 'https://www.bing.com/?form=ML2PCR&OCID=ML2PCR&
 
     // Set interval to reload the page every n hours and start over
     setInterval(function () {
+        console.log("[Cards] Scheduled reload triggered.");
         location.reload();
     }, reloadInterval);
 

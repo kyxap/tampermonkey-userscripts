@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 1 of 3 | PC Searches Points Breakdown
 // @namespace    https://github.com/kyxap/tampermonkey-userscripts/
-// @version      0.1.7
-// @description  PC Searches Points Breakdown (Sequential Tab-based searching with status logging)
+// @version      0.1.8
+// @description  PC Searches Points Breakdown (Sequential Tab-based searching with persisted stuck detection)
 // @match        https://rewards.bing.com/pointsbreakdown*
 // @grant        window.close
 // @grant        GM_setValue
@@ -16,7 +16,7 @@ const searchesCounterCSS = `[ng-bind-html="$ctrl.pointProgressText"]`;
 const linkToPCSearchCSS = `#pointsCounters_pcSearchLevel2_0, #pointsCounters_pcSearch_0, [id^="pointsCounters_pcSearch"], a[href*="PC Search"]`;
 
 // COOLDOWN SETTINGS
-const BASE_WAIT = 25000; // 25s
+const BASE_WAIT = 30000; // Increased to 30s to be even safer
 const RELOAD_INTERVAL = 3600 * 5 * 1000; // 5 hours
 const STUCK_RELOAD_DELAY = 15 * 60 * 1000; // 15 minutes
 
@@ -77,11 +77,22 @@ async function processSearches() {
     if (pcCounter) {
         let lastCount = getCount(pcCounter, 0);
         let maxPC = getCount(pcCounter, 1);
-        let stuckCount = 0;
+        
+        // PERSISTED STUCK DETECTION
+        let stuckCount = GM_getValue('pc_stuck_count', 0);
+        const lastStuckTimestamp = GM_getValue('pc_stuck_timestamp', 0);
+        
+        // If we are currently in a 15-minute cooldown, don't do anything
+        if (Date.now() - lastStuckTimestamp < STUCK_RELOAD_DELAY) {
+            const remaining = Math.round((STUCK_RELOAD_DELAY - (Date.now() - lastStuckTimestamp)) / 60000);
+            console.warn(`[PC] In cooldown. Waiting ${remaining} more minutes.`);
+            setTimeout(() => location.reload(), STUCK_RELOAD_DELAY - (Date.now() - lastStuckTimestamp));
+            return;
+        }
 
-        console.log(`[PC] Starting searches. Current: ${lastCount}/${maxPC}`);
+        console.log(`[PC] Starting searches. Current: ${lastCount}/${maxPC} (Stuck count: ${stuckCount})`);
 
-        while (lastCount < maxPC) {
+        if (lastCount < maxPC) {
             const pcLink = document.querySelector(linkToPCSearchCSS);
             if (!pcLink) {
                 console.error("[PC] Search link not found. Refreshing...");
@@ -99,26 +110,31 @@ async function processSearches() {
             
             if (currentCount > lastCount) {
                 console.log(`[PC] SUCCESS! Points increased: ${lastCount} -> ${currentCount} (Updated at: ${new Date().toLocaleTimeString()})`);
+                GM_setValue('pc_stuck_count', 0); // Reset stuck count
                 lastCount = currentCount;
-                stuckCount = 0;
+                // Continue to next search in loop or reload to refresh DOM
+                location.reload(); 
             } else {
                 stuckCount++;
+                GM_setValue('pc_stuck_count', stuckCount);
                 console.warn(`[PC] Points didn't update (Attempt ${stuckCount}/3).`);
                 
                 if (stuckCount >= 3) {
-                    const nextAttempt = new Date(new Date().getTime() + STUCK_RELOAD_DELAY);
-                    console.error(`[PC] STUCK! 15-min cooldown likely active.`);
+                    const nextAttempt = new Date(Date.now() + STUCK_RELOAD_DELAY);
+                    console.error(`[PC] STUCK! 15-min cooldown initiated.`);
                     console.log(`[PC] Next attempt scheduled for: ${nextAttempt.toLocaleTimeString()}`);
+                    GM_setValue('pc_stuck_timestamp', Date.now());
                     setTimeout(() => location.reload(), STUCK_RELOAD_DELAY);
                     return;
                 }
                 
-                console.log("[PC] Refreshing breakdown page to force point update...");
+                console.log("[PC] Refreshing breakdown page to try again...");
                 location.reload();
-                return;
             }
+        } else {
+            console.log("[PC] All PC searches complete!");
+            GM_setValue('pc_stuck_count', 0); // Clear for next day
         }
-        console.log("[PC] All PC searches complete!");
     }
 
     if (mobileCounter) {
