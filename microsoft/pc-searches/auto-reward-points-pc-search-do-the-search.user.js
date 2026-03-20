@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points PC Searches 2 of 3 | Do the search
 // @namespace    https://rewards.bing.com/
-// @version      0.0.7
+// @version      0.0.8
 // @description  Do the search
 // @match        https://www.bing.com/news/?form=*
 // @grant        GM_xmlhttpRequest
@@ -77,6 +77,7 @@ function askAI(prompt, callback) {
     GM_xmlhttpRequest({
         method: "GET",
         url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(prompt)}`,
+        timeout: 10000,
         onload: function (response) {
             if (response.status === 200) {
                 const result = response.responseText;
@@ -96,6 +97,12 @@ function askAI(prompt, callback) {
             const rndStatic = generateRandomSearchText();
             console.log("Query generated from static data: " + rndStatic)
             callback(rndStatic);
+        },
+        ontimeout: function () {
+            console.error("Request to local AI service timed out, using fallback query instead.");
+            const fallback = generateRandomSearchText();
+            console.log('Fallback Query (timeout):', fallback);
+            callback(fallback);
         }
     });
 }

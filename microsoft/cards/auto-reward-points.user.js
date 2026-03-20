@@ -217,14 +217,14 @@ function askAI(prompt, callback) {
             console.error('Failed to build fallback query, using default.', e);
             return 'bing daily set';
         }
-    }
-
-    // Call your Spring Boot API
-    GM_xmlhttpRequest({
-        method: "GET",
-        url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(task)}`,
-        timeout: 4000,
-        onload: function (response) {
+    // @version      0.1.8
+    ...
+        // Call your Spring Boot API
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent(task)}`,
+            timeout: 10000,
+            onload: function (response) {
             if (response.status === 200) {
                 const result = response.responseText;
                 console.log("Generated Query:", result);

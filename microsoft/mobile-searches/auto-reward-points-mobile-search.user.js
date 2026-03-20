@@ -39,15 +39,15 @@
             }
             console.log("[Background Searcher] All triggered mobile searches complete.");
         }
-    }
-
-    async function getQuery() {
-        return new Promise((resolve) => {
-            GM_xmlhttpRequest({
-                method: "GET",
-                url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent("One-line unique search query, no quotes.")}`,
-                timeout: 5000,
-                onload: (res) => {
+    // @version      0.1.5
+    ...
+        async function getQuery() {
+            return new Promise((resolve) => {
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: `http://localhost:5433/api/generate?prompt=${encodeURIComponent("One-line unique search query, no quotes.")}`,
+                    timeout: 10000,
+                    onload: (res) => {
                     if (res.status === 200) resolve(res.responseText.trim());
                     else resolve(getRandomFallbackQuery());
                 },
