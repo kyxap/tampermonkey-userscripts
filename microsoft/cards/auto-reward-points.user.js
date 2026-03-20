@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://rewards.bing.com
-// @version      0.2.1
+// @version      0.2.2
 // @description  Get Microsoft points automatically (with status logging, click limits, and debug UI)
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -24,6 +24,13 @@ const BING_REWARDS_SEARCH_BASE = 'https://www.bing.com/?form=ML2PCR&OCID=ML2PCR&
 
 const MAX_CLICKS_PER_CARD = 3;
 const DEFAULT_AI_BASE_URL = 'http://localhost:5433';
+
+// Base selectors for clickable icon/image inside a card.
+const cardsBaseCSS = '.mee-icon-AddMedium[aria-label="plus"], .image-icon, .c-image';
+// First 3 cards on top (Daily set)
+const cardsDailySetCSS = '[points="$ctrl.item.points"] ' + cardsBaseCSS;
+// More activities section below.
+const cardsMoreActivitiesCSS = '[points="item.points"] ' + cardsBaseCSS;
 
 (function () {
     'use strict';
@@ -148,20 +155,10 @@ function incrementClickCount(cardId) {
 }
 
 function findAndClick() {
-    // Base selector for clickable icon/image inside a card.
-    // Microsoft keeps changing classes/attributes, so we keep this flexible.
-    const cardsBaseCSS = '.mee-icon-AddMedium[aria-label="plus"], .image-icon, .c-image';
-
-    // First 3 cards on top (Daily set), only need a simple click.
-    const cardsDailySetCSS = '[points="$ctrl.item.points"] ' + cardsBaseCSS;
-
-    // More activities section below.
-    const cardsMoreActivitiesCSS = '[points="item.points"] ' + cardsBaseCSS;
-
     // Wait for the page to load and then execute the script
     window.addEventListener('load', function () {
             let cardMoreActivitiesElements = document.querySelectorAll(cardsMoreActivitiesCSS);
-            const cardDailySetElements = document.querySelectorAll(cardDailySetCSS);
+            const cardDailySetElements = document.querySelectorAll(cardsDailySetCSS);
 
             // top 3 cards that need only click without custom search query
             if (cardDailySetElements.length > 0) {
@@ -185,7 +182,6 @@ function findAndClick() {
                         console.log(`Working on card with a text: "${cardText}" (Click ${clickCount + 1}/${MAX_CLICKS_PER_CARD})`);
                         card.click();
                         incrementClickCount(cardText);
-                        // another script will close opened tab
                     }
                 )
             } else {
@@ -203,9 +199,6 @@ function findAndClick() {
                             return;
                         }
                         
-                        // click on card, since there a chance that this one need click without any custom search
-                        // TODO: identify this case and avoid this if is not needed
-
                         // extract text from cards description and ask AI
                         const data = card.closest('.rewards-card-container') || card.closest('.ds-card-sec');
                         if (!data) {
