@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Microsoft Reword Points Cards 1 of 3 | Clicks on cards
 // @namespace    https://github.com/kyxap/tampermonkey-userscripts/
-// @version      0.2.3
+// @version      0.2.4
 // @description  Get Microsoft points automatically (with status logging, click limits, and debug UI)
 // @author       kyxap | https://github.com/kyxap
 // @match        https://rewards.bing.com/?form=*
@@ -154,6 +154,35 @@ function incrementClickCount(cardId) {
     GM_setValue('clickCounts', counts);
 }
 
+function getCardText(card, container) {
+    // 1. Try aria-label on container
+    let text = container ? container.getAttribute('aria-label') : null;
+    if (text) return text.trim();
+
+    // 2. Try alt on card (img)
+    text = card.getAttribute('alt');
+    if (text) return text.trim();
+
+    // 3. Try title on card
+    text = card.getAttribute('title');
+    if (text) return text.trim();
+
+    // 4. Try title on parent anchor
+    const link = card.closest('a');
+    if (link) {
+        text = link.getAttribute('title');
+        if (text) return text.trim();
+    }
+
+    // 5. Try innerText of container (last resort)
+    if (container) {
+        text = container.innerText;
+        if (text) return text.trim().split('\n')[0]; // Just the first line
+    }
+
+    return null;
+}
+
 function findAndClick() {
     // Wait for the page to load and then execute the script
     window.addEventListener('load', function () {
@@ -165,12 +194,13 @@ function findAndClick() {
                 console.log('===> Daily sets elements found, checking before click');
 
                 cardDailySetElements.forEach(function (card) {
-                        const data = card.closest('.rewards-card-container') || card.closest('.ds-card-sec');
-                        if (!data) {
-                            console.warn('Daily set card: could not find container with aria-label, skipping.', card);
+                        const container = card.closest('.rewards-card-container') || card.closest('.ds-card-sec');
+                        const cardText = getCardText(card, container);
+                        
+                        if (!cardText) {
+                            console.warn('Daily set card: could not find any text for card, skipping.', card);
                             return;
                         }
-                        const cardText = data.getAttribute('aria-label') || '';
                         
                         // Check click limit
                         const clickCount = getClickCount(cardText);
@@ -199,13 +229,13 @@ function findAndClick() {
                             return;
                         }
                         
-                        // extract text from cards description and ask AI
-                        const data = card.closest('.rewards-card-container') || card.closest('.ds-card-sec');
-                        if (!data) {
-                            console.warn('More activities card: could not find container with aria-label, skipping.', card);
+                        const container = card.closest('.rewards-card-container') || card.closest('.ds-card-sec');
+                        const cardText = getCardText(card, container);
+
+                        if (!cardText) {
+                            console.warn('More activities card: could not find any text for card, skipping.', card);
                             return;
                         }
-                        const cardText = data.getAttribute('aria-label') || '';
                         
                         // Check click limit
                         const clickCount = getClickCount(cardText);
@@ -258,11 +288,12 @@ function findAndClick() {
                     console.log('===> Fallback More Activities Elements found, checking before click');
 
                     cardMoreActivitiesElements.forEach(function (card) {
-                            const data = card.closest('.ds-card-sec');
-                            if (!data) {
+                            const container = card.closest('.ds-card-sec');
+                            const cardText = getCardText(card, container);
+                            
+                            if (!cardText) {
                                 return;
                             }
-                            const cardText = data.getAttribute('aria-label');
                             
                             // Check click limit
                             const clickCount = getClickCount(cardText);
