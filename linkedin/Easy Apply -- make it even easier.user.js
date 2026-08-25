@@ -33,19 +33,11 @@
         '.job-card-list__title'
     ];
 
-    const allowedUrls = [
-        "https://www.linkedin.com/jobs/search/",
-        "https://www.linkedin.com/jobs/collections/",
-        "https://www.linkedin.com/jobs/search-results/",
-        "https://www.linkedin.com/preload/",
-        "https://www.linkedin.com/jobs/view/"
-    ];
-
-    // Create a debounced version of the start function
-    const debouncedStart = debounce(start, 500); // Adjust the delay as needed
+    // Create a throttled version of the start function to prevent starvation from continuous mutations
+    const throttledStart = throttle(start, 500);
 
     // Create a MutationObserver
-    var observer = new MutationObserver(debouncedStart);
+    var observer = new MutationObserver(throttledStart);
 
     // Observe changes in the document
     observer.observe(document.body, { subtree: true, childList: true });
@@ -125,9 +117,14 @@
     }
 
     function start() {
-        var url = location.href;
-        if (allowedUrls.some(allowedUrl => url.startsWith(allowedUrl))) {
-            logHighlighter("Easy Apply script is active...");
+        const modalPresent = document.querySelector('.jobs-easy-apply-modal');
+        const safetyHeader = document.querySelector('h2#header');
+        const isSafetyReminder = safetyHeader && safetyHeader.textContent.trim() === "Job search safety reminder";
+        
+        if (!modalPresent && !isSafetyReminder) {
+            return;
+        }
+        logHighlighter("Easy Apply script is active...");
 
             // 0. Handle "Job search safety reminder" modal
             const safetyReminderHeader = document.querySelector('h2#header');
@@ -148,7 +145,7 @@
                 const nextButton = document.querySelector(nextButtonSelector);
                 if (nextButton) {
                     logHighlighter("Contact info step detected, clicking Next...");
-                    nextButton.click();
+                    clickElement(nextButton);
                     return;
                 }
             }
@@ -158,10 +155,21 @@
                 const jobType = getJobType();
                 logHighlighter(`Resume step detected ("${stepText}"). We think this is: ${jobType}`);
                 
+                // Check if a resume is already selected (by user or pre-selected by LinkedIn)
+                const selectedResume = document.querySelector('.jobs-document-upload-redesign-card__container--selected');
+                if (selectedResume) {
+                    logHighlighter("A resume is already selected. Proceeding to next step...");
+                    const nextButton = document.querySelector(nextButtonSelector);
+                    if (nextButton) {
+                        clickElement(nextButton);
+                        return;
+                    }
+                }
+                
                 if (jobType !== "Unknown") {
                     const resumeContainers = document.querySelectorAll('.jobs-document-upload-redesign-card__container');
                     let targetResume = null;
-
+                    
                     resumeContainers.forEach(container => {
                         const fileNameEl = container.querySelector('.jobs-document-upload-redesign-card__file-name');
                         if (fileNameEl && fileNameEl.textContent.trim().toUpperCase().includes(jobType)) {
@@ -174,13 +182,13 @@
                         
                         // Check if already selected
                         if (!targetResume.classList.contains('jobs-document-upload-redesign-card__container--selected')) {
-                            targetResume.click();
+                            clickElement(targetResume);
                         }
 
                         const nextButton = document.querySelector(nextButtonSelector);
                         if (nextButton) {
                             logHighlighter("Proceeding to next step...");
-                            nextButton.click();
+                            clickElement(nextButton);
                             return;
                         }
                     } else {
@@ -205,11 +213,11 @@
                 const followCompanyCheckbox = document.querySelector(followCompanySelector);
                 if (followCompanyCheckbox && followCompanyCheckbox.checked) {
                     logHighlighter('Unchecking follow company before submission...');
-                    followCompanyCheckbox.click();
+                    clickElement(followCompanyCheckbox);
                 }
                 
                 logHighlighter("Review step detected, clicking Submit Application...");
-                submitButton.click();
+                clickElement(submitButton);
                 return;
             }
 
@@ -224,7 +232,7 @@
                 
                 if (complete) {
                     logHighlighter(`Form complete, clicking ${reviewButton ? "Review" : "Next"}...`);
-                    btnToClick.click();
+                    clickElement(btnToClick);
                     return;
                 } else {
                     logHighlighter(`Standing by for manual input on "${stepText}" step.`);
@@ -236,7 +244,7 @@
             const doneBtn = document.querySelector(doneButtonOnPopUpSelector);
             if (doneBtn) {
                 logHighlighter('Initial application sent, clicking Done...');
-                doneBtn.click();
+                clickElement(doneBtn);
                 return;
             }
 
@@ -246,18 +254,30 @@
                 const notNowBtn = Array.from(postApplyModal.querySelectorAll('button')).find(btn => btn.textContent.trim().toLowerCase() === "not now");
                 if (notNowBtn) {
                     logHighlighter('NBA modal detected, clicking "Not now"...');
-                    notNowBtn.click();
+                    clickElement(notNowBtn);
                 } else {
                     const closeBtn = postApplyModal.querySelector(xButtonOnPopUpSelector);
                     if (closeBtn) {
                         logHighlighter('NBA modal detected, clicking close (X)...');
-                        closeBtn.click();
+                        clickElement(closeBtn);
                     }
                 }
             }
-        }
     }
 })();
+
+function clickElement(element) {
+    if (!element) return;
+    element.click();
+    
+    // Also dispatch pointer and mouse events in case standard .click() is ignored by the framework
+    const eventOptions = { bubbles: true, cancelable: true, view: window };
+    element.dispatchEvent(new PointerEvent('pointerdown', eventOptions));
+    element.dispatchEvent(new MouseEvent('mousedown', eventOptions));
+    element.dispatchEvent(new PointerEvent('pointerup', eventOptions));
+    element.dispatchEvent(new MouseEvent('mouseup', eventOptions));
+    element.dispatchEvent(new MouseEvent('click', eventOptions));
+}
 
 function waitForElm(selector) {
     return new Promise((resolve, reject) => {
@@ -285,12 +305,29 @@ function waitForElm(selector) {
     });
 }
 
-// Debounce function to limit the frequency of calls
-function debounce(func, delay) {
-    let timeout;
-    return function () {
-        clearTimeout(timeout);
-        timeout = setTimeout(func, delay);
+// Throttle function to limit the frequency of calls without starvation
+function throttle(func, limit) {
+    let lastFunc;
+    let lastRan;
+    return function() {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+            func.apply(context, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(lastFunc);
+            const remaining = limit - (Date.now() - lastRan);
+            if (remaining <= 0) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            } else {
+                lastFunc = setTimeout(function() {
+                    func.apply(context, args);
+                    lastRan = Date.now();
+                }, remaining);
+            }
+        }
     };
 }
 
