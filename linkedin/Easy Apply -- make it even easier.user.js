@@ -117,7 +117,7 @@
     }
 
     function start() {
-        const modalPresent = document.querySelector('.jobs-easy-apply-modal');
+        const modalPresent = document.querySelector('div[data-test-modal], .artdeco-modal');
         const safetyHeader = document.querySelector('h2#header');
         const isSafetyReminder = safetyHeader && safetyHeader.textContent.trim() === "Job search safety reminder";
         
@@ -139,6 +139,25 @@
 
             const currentStepHeader = document.querySelector(stepHeaderSelector);
             const stepText = currentStepHeader ? currentStepHeader.textContent.trim().toLowerCase() : "";
+
+            // Check for submission errors or application error feedback (scoped inside the modal)
+            const errorEl = modalPresent ? modalPresent.querySelector('.artdeco-inline-feedback--error, .artdeco-inline-feedback[role="alert"], [data-test-form-builder-error]') : null;
+            if (errorEl) {
+                const errorText = errorEl.textContent.trim();
+                if (errorText) {
+                    logHighlighter(`Form/Submission error detected: "${errorText}"`);
+                    if (errorText.toLowerCase().includes("already applied")) {
+                        const closeBtn = modalPresent.querySelector(xButtonOnPopUpSelector);
+                        if (closeBtn) {
+                            logHighlighter("Already applied error, closing modal...");
+                            clickElement(closeBtn);
+                            return;
+                        }
+                    }
+                    // Stand by so we don't click endlessly on errors
+                    return;
+                }
+            }
 
             // 1. Contact info step (Auto-click)
             if (stepText.includes("contact info")) {
@@ -240,26 +259,33 @@
                 }
             }
 
-            // 5. Done button (Initial Success screen)
-            const doneBtn = document.querySelector(doneButtonOnPopUpSelector);
-            if (doneBtn) {
-                logHighlighter('Initial application sent, clicking Done...');
-                clickElement(doneBtn);
-                return;
-            }
-
-            // 6. Close post-apply NBA (Next Best Action) modal
-            const postApplyModal = document.querySelector(postApplyModalSelector);
-            if (postApplyModal) {
-                const notNowBtn = Array.from(postApplyModal.querySelectorAll('button')).find(btn => btn.textContent.trim().toLowerCase() === "not now");
+            // 5. Done button / Post-apply NBA / Dialog close handling
+            const modals = document.querySelectorAll('div[data-test-modal], .artdeco-modal');
+            for (const modal of modals) {
+                // Find "Not now" button
+                const notNowBtn = Array.from(modal.querySelectorAll('button')).find(btn => btn.textContent.trim().toLowerCase() === "not now");
                 if (notNowBtn) {
-                    logHighlighter('NBA modal detected, clicking "Not now"...');
+                    logHighlighter('NBA modal/popup detected, clicking "Not now"...');
                     clickElement(notNowBtn);
-                } else {
-                    const closeBtn = postApplyModal.querySelector(xButtonOnPopUpSelector);
+                    return;
+                }
+
+                // Find "Done" button
+                const doneBtn = Array.from(modal.querySelectorAll('button')).find(btn => btn.textContent.trim().toLowerCase() === "done");
+                if (doneBtn) {
+                    logHighlighter('Done button detected inside modal, clicking Done...');
+                    clickElement(doneBtn);
+                    return;
+                }
+
+                // If application was sent, but only X button is present, click close
+                const headerText = modal.textContent.toLowerCase();
+                if (headerText.includes("application was sent") || headerText.includes("application sent")) {
+                    const closeBtn = modal.querySelector(xButtonOnPopUpSelector);
                     if (closeBtn) {
                         logHighlighter('NBA modal detected, clicking close (X)...');
                         clickElement(closeBtn);
+                        return;
                     }
                 }
             }
